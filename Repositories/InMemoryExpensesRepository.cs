@@ -26,5 +26,10 @@ namespace moneyManager.Repositories
             this.expenses.Add(expense);
         }
 
+        public void updateExpense(Expense expense)
+        {
+            var index = expenses.FindIndex(e => e.Id == expense.Id);
+            expenses[index] = expense; 
+        }
     }
 }

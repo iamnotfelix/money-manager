@@ -58,5 +58,30 @@ namespace moneyManager.Controllers
 
             return CreatedAtAction(nameof(GetExpense), new { id = actualExpense.Id }, expense);
         }
+
+        // PUT /expense/{id}
+        [HttpPut("{id}")]
+        public ActionResult UpdateItem(Guid id, UpdateExpenseDto expense) 
+        {
+            var existingExpense = this.repository.getExpense(id);
+            if (existingExpense == null)
+            {
+                return NotFound();
+            }
+
+            Expense updatedExpense = new Expense() 
+            {
+                Id = existingExpense.Id,
+                Amount = expense.Amount,
+                Category = expense.Category,
+                PaymentType = expense.PaymentType,
+                Description = expense.Description,
+                Time = expense.Time
+            };
+
+            this.repository.updateExpense(updatedExpense);
+
+            return NoContent();
+        }
     }
 }

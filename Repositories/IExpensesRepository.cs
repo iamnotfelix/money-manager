@@ -7,5 +7,6 @@ namespace moneyManager.Repositories
         Expense getExpense(Guid id);
         IEnumerable<Expense> getExpenses();
         void createExpense(Expense expense);
+        void updateExpense(Expense expense);
     }
 }
