@@ -83,5 +83,19 @@ namespace moneyManager.Controllers
 
             return NoContent();
         }
+
+        // DELETE /expenses/{id}
+        [HttpDelete("{id}")]
+        public ActionResult DeleteExpense(Guid id)
+        {
+            var exisitingExpense = this.repository.getExpense(id);
+            if (exisitingExpense == null)
+            {
+                return NotFound();
+            }
+            
+            repository.deleteExpense(id);
+            return NoContent();
+        }
     }
 }

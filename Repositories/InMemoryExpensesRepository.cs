@@ -28,8 +28,14 @@ namespace moneyManager.Repositories
 
         public void updateExpense(Expense expense)
         {
-            var index = expenses.FindIndex(e => e.Id == expense.Id);
+            var index = this.expenses.FindIndex(e => e.Id == expense.Id);
             expenses[index] = expense; 
+        }
+
+        public void deleteExpense(Guid id)
+        {
+            var index = this.expenses.FindIndex(e => e.Id == id);
+            expenses.RemoveAt(index);
         }
     }
 }

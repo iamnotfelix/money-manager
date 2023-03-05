@@ -8,5 +8,6 @@ namespace moneyManager.Repositories
         IEnumerable<Expense> getExpenses();
         void createExpense(Expense expense);
         void updateExpense(Expense expense);
+        void deleteExpense(Guid id);
     }
 }
