@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using moneyManager.Repositories;
 using moneyManager.Models;
+using moneyManager.Dtos;
 
 namespace moneyManager.Controllers
 {
@@ -15,6 +16,8 @@ namespace moneyManager.Controllers
             this.repository = repository;
         }
 
+
+        // GET /expenses
         [HttpGet]
         public IEnumerable<Expense> GetExpenses() 
         {
@@ -23,6 +26,8 @@ namespace moneyManager.Controllers
             return expenses;
         }
 
+
+        // GET /expenses/{id}
         [HttpGet("{id}")]
         public ActionResult<Expense> GetExpense(Guid id)
         {
@@ -34,10 +39,24 @@ namespace moneyManager.Controllers
             }
 
             return expense;
-            /*if (expenses == null) 
-            {
-                return NotFound();
-            }*/
+        }
+
+        // POST /expense
+        [HttpPost]
+        public ActionResult<Expense> CreateExpense(CreateExpenseDto expense) 
+        {
+            var actualExpense = new Expense() {
+                Id = Guid.NewGuid(),
+                Amount = expense.Amount,
+                Category = expense.Category,
+                PaymentType = expense.PaymentType,
+                Description = expense.Description,
+                Time = expense.Time
+            };
+
+            this.repository.createExpense(actualExpense);
+
+            return CreatedAtAction(nameof(GetExpense), new { id = actualExpense.Id }, expense);
         }
     }
 }

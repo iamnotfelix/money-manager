@@ -20,5 +20,11 @@ namespace moneyManager.Repositories
         {
             return this.expenses.Where(expense => expense.Id == id).SingleOrDefault();
         }
+
+        public void createExpense(Expense expense) 
+        {
+            this.expenses.Add(expense);
+        }
+
     }
 }
