@@ -11,8 +11,10 @@ namespace moneyManager.Dtos
         public string? Category { get; set; }
         [Required]
         public string? PaymentType { get; set; }
-        public string?  Description { get; set; }
         [Required]
-        public DateTime Time { get; set; }
+        public string? Currency { get; set; }
+        [Required]
+        public DateTime Date { get; set; }
+        public string? Description { get; set; }
     }
 }
