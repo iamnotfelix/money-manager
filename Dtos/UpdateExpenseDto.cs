@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using moneyManager.Models;
 
 namespace moneyManager.Dtos
 {
@@ -8,13 +9,13 @@ namespace moneyManager.Dtos
         [Range(0, 10000)]
         public int Amount { get; set; }
         [Required]
-        public string? Category { get; set; }
+        public List<Category>? Category { get; set; }
         [Required]
         public string? PaymentType { get; set; }
+        public string? Description { get; set; }
         [Required]
         public string? Currency { get; set; }
         [Required]
         public DateTime Date { get; set; }
-        public string? Description { get; set; }
     }
 }
