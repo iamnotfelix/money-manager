@@ -72,7 +72,7 @@ namespace moneyManager.Controllers
 
         // PUT /expense/{id}
         [HttpPut("{id}")]
-        public async Task<ActionResult> UpdateItemAsync(Guid id, UpdateExpenseDto expense) 
+        public async Task<ActionResult> UpdateExpenseAsync(Guid id, UpdateExpenseDto expense) 
         {
             var existingExpense = await this.context.Expense.FindAsync(id);
             if (existingExpense == null)
