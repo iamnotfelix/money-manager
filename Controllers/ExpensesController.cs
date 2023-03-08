@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using moneyManager.Repositories;
 using moneyManager.Models;
 using moneyManager.Dtos;
+using System.Threading.Tasks;
 
 namespace moneyManager.Controllers
 {
@@ -19,27 +20,27 @@ namespace moneyManager.Controllers
 
         // GET /expenses
         [HttpGet]
-        public ActionResult<IEnumerable<Expense>> GetExpenses() 
+        public async Task<ActionResult<IEnumerable<Expense>>> GetExpensesAsync() 
         { 
             if (this.context.Expense == null) 
             {
                 return NotFound();
             }
 
-            return this.context.Expense.ToList<Expense>();
+            return await Task.FromResult(this.context.Expense.ToList<Expense>());
         }
 
 
         // GET /expenses/{id}
         [HttpGet("{id}")]
-        public ActionResult<Expense> GetExpense(Guid id)
+        public async Task<ActionResult<Expense>> GetExpenseAsync(Guid id)
         {
             if (this.context.Expense is null) 
             {
                 return NotFound();
             }
 
-            var expense = context.Expense.Find(id);
+            var expense = await context.Expense.FindAsync(id);
 
             if (expense == null)
             {
@@ -51,7 +52,7 @@ namespace moneyManager.Controllers
 
         // POST /expense
         [HttpPost]
-        public ActionResult<Expense> CreateExpense(CreateExpenseDto expense) 
+        public async Task<ActionResult<Expense>> CreateExpenseAsync(CreateExpenseDto expense) 
         {
             var actualExpense = new Expense() {
                 Id = Guid.NewGuid(),
@@ -64,16 +65,16 @@ namespace moneyManager.Controllers
             };
 
             this.context.Expense.Add(actualExpense);
-            this.context.SaveChanges();
+            await this.context.SaveChangesAsync();
 
-            return CreatedAtAction(nameof(GetExpense), new { id = actualExpense.Id }, actualExpense);
+            return CreatedAtAction(nameof(GetExpenseAsync), new { id = actualExpense.Id }, actualExpense);
         }
 
         // PUT /expense/{id}
         [HttpPut("{id}")]
-        public ActionResult UpdateItem(Guid id, UpdateExpenseDto expense) 
+        public async Task<ActionResult> UpdateItemAsync(Guid id, UpdateExpenseDto expense) 
         {
-            var existingExpense = this.context.Expense.Find(id);
+            var existingExpense = await this.context.Expense.FindAsync(id);
             if (existingExpense == null)
             {
                 return NotFound();
@@ -86,25 +87,25 @@ namespace moneyManager.Controllers
             existingExpense.Date = expense.Date;
             existingExpense.Description = expense.Description;
 
-            this.context.SaveChanges();
+            await this.context.SaveChangesAsync();
             
-            // NOTE: id multithreading is added, I need to keep track of concurency
+            // NOTE:  might have concurency problems
 
             return NoContent();
         }
 
         // DELETE /expenses/{id}
         [HttpDelete("{id}")]
-        public ActionResult DeleteExpense(Guid id)
+        public async Task<ActionResult> DeleteExpenseAsync(Guid id)
         {
-            var exisitingExpense = this.context.Expense.Find(id);
+            var exisitingExpense = await this.context.Expense.FindAsync(id);
             if (exisitingExpense == null)
             {
                 return NotFound();
             }
             
             this.context.Expense.Remove(exisitingExpense); 
-            this.context.SaveChanges();
+            await this.context.SaveChangesAsync();
 
             return NoContent();
         }
