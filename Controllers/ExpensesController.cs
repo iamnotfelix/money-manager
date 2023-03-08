@@ -9,21 +9,24 @@ namespace moneyManager.Controllers
     [Route("api/[controller]")]
     public class ExpensesController : ControllerBase
     {
-        private readonly IExpensesRepository repository;
+        private readonly ExpensesContext context;
 
-        public ExpensesController(IExpensesRepository repository) 
+        public ExpensesController(ExpensesContext context) 
         {
-            this.repository = repository;
+            this.context = context;
         }
 
 
         // GET /expenses
         [HttpGet]
-        public IEnumerable<Expense> GetExpenses() 
-        {
-            var expenses = repository.getExpenses();
+        public ActionResult<IEnumerable<Expense>> GetExpenses() 
+        { 
+            if (this.context.Expense == null) 
+            {
+                return NotFound();
+            }
 
-            return expenses;
+            return this.context.Expense.ToList<Expense>();
         }
 
 
@@ -31,7 +34,12 @@ namespace moneyManager.Controllers
         [HttpGet("{id}")]
         public ActionResult<Expense> GetExpense(Guid id)
         {
-            var expense = repository.getExpense(id);
+            if (this.context.Expense is null) 
+            {
+                return NotFound();
+            }
+
+            var expense = context.Expense.Find(id);
 
             if (expense == null)
             {
@@ -50,36 +58,37 @@ namespace moneyManager.Controllers
                 Amount = expense.Amount,
                 Category = expense.Category,
                 PaymentType = expense.PaymentType,
-                Description = expense.Description,
-                Time = expense.Time
+                Currency = expense.Currency,
+                Date = expense.Date,
+                Description = expense.Description
             };
 
-            this.repository.createExpense(actualExpense);
+            this.context.Expense.Add(actualExpense);
+            this.context.SaveChanges();
 
-            return CreatedAtAction(nameof(GetExpense), new { id = actualExpense.Id }, expense);
+            return CreatedAtAction(nameof(GetExpense), new { id = actualExpense.Id }, actualExpense);
         }
 
         // PUT /expense/{id}
         [HttpPut("{id}")]
         public ActionResult UpdateItem(Guid id, UpdateExpenseDto expense) 
         {
-            var existingExpense = this.repository.getExpense(id);
+            var existingExpense = this.context.Expense.Find(id);
             if (existingExpense == null)
             {
                 return NotFound();
             }
 
-            Expense updatedExpense = new Expense() 
-            {
-                Id = existingExpense.Id,
-                Amount = expense.Amount,
-                Category = expense.Category,
-                PaymentType = expense.PaymentType,
-                Description = expense.Description,
-                Time = expense.Time
-            };
+            existingExpense.Amount = expense.Amount;
+            existingExpense.Category = expense.Category;
+            existingExpense.PaymentType = expense.PaymentType;
+            existingExpense.Currency = expense.Currency;
+            existingExpense.Date = expense.Date;
+            existingExpense.Description = expense.Description;
 
-            this.repository.updateExpense(updatedExpense);
+            this.context.SaveChanges();
+            
+            // NOTE: id multithreading is added, I need to keep track of concurency
 
             return NoContent();
         }
@@ -88,13 +97,15 @@ namespace moneyManager.Controllers
         [HttpDelete("{id}")]
         public ActionResult DeleteExpense(Guid id)
         {
-            var exisitingExpense = this.repository.getExpense(id);
+            var exisitingExpense = this.context.Expense.Find(id);
             if (exisitingExpense == null)
             {
                 return NotFound();
             }
             
-            repository.deleteExpense(id);
+            this.context.Expense.Remove(exisitingExpense); 
+            this.context.SaveChanges();
+
             return NoContent();
         }
     }
