@@ -4,9 +4,9 @@ using MySql.EntityFrameworkCore.Extensions;
 
 namespace moneyManager.Repositories
 {
-    public class ExpensesContext : DbContext
+    public class DatabaseContext : DbContext
     {
-        public ExpensesContext(DbContextOptions<ExpensesContext> options) : base(options) { }
+        public DatabaseContext(DbContextOptions<DatabaseContext> options) : base(options) { }
 
         public DbSet<Expense> Expense { get; set; } = null!;
         public DbSet<User> Users { get; set; } = null!;

@@ -9,7 +9,7 @@ using moneyManager.Repositories;
 
 namespace moneyManager.Migrations
 {
-    [DbContext(typeof(ExpensesContext))]
+    [DbContext(typeof(DatabaseContext))]
     partial class ExpensesContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)

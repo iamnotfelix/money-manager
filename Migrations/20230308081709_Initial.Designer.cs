@@ -10,7 +10,7 @@ using moneyManager.Repositories;
 
 namespace moneyManager.Migrations
 {
-    [DbContext(typeof(ExpensesContext))]
+    [DbContext(typeof(DatabaseContext))]
     [Migration("20230308081709_Initial")]
     partial class Initial
     {

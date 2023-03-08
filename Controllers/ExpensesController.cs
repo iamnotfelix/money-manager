@@ -10,9 +10,9 @@ namespace moneyManager.Controllers
     [Route("api/[controller]")]
     public class ExpensesController : ControllerBase
     {
-        private readonly ExpensesContext context;
+        private readonly DatabaseContext context;
 
-        public ExpensesController(ExpensesContext context) 
+        public ExpensesController(DatabaseContext context) 
         {
             this.context = context;
         }
