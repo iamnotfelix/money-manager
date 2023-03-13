@@ -50,6 +50,19 @@ namespace moneyManager.Controllers
             return expense.AsDto();
         }
 
+        // GET /expenses/filter/{nr}
+        [HttpGet("filter/{nr}")]
+        public async Task<ActionResult<ExpenseDto>> GetExpensesHigherThan(int nr)
+        {
+            if (this.context.Expense is null)
+            {
+                return NotFound();
+            }
+
+            var expenses = await Task.FromResult(this.context.Expense.Where(expense => expense.Amount > nr));
+            return Ok(expenses.Select(expense => expense.AsDto()));
+        }
+
         // POST /expense
         [HttpPost]
         public async Task<ActionResult<ExpenseDto>> CreateExpenseAsync(CreateExpenseDto expense) 
