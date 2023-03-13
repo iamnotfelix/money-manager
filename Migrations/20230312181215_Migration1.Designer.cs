@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using moneyManager.Repositories;
 
@@ -10,9 +11,11 @@ using moneyManager.Repositories;
 namespace moneyManager.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    partial class ExpensesContextModelSnapshot : ModelSnapshot
+    [Migration("20230312181215_Migration1")]
+    partial class Migration1
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -28,26 +31,21 @@ namespace moneyManager.Migrations
                     b.Property<string>("Color")
                         .HasColumnType("longtext");
 
-                    b.Property<Guid?>("CreatedById")
-                        .HasColumnType("char(36)");
-
                     b.Property<DateTime>("DateCreated")
                         .HasColumnType("datetime(6)");
 
                     b.Property<string>("Description")
                         .HasColumnType("longtext");
 
-                    b.Property<Guid?>("ExpenseId")
-                        .HasColumnType("char(36)");
-
                     b.Property<string>("Name")
                         .HasColumnType("longtext");
 
+                    b.Property<Guid?>("UserId")
+                        .HasColumnType("char(36)");
+
                     b.HasKey("Id");
 
-                    b.HasIndex("CreatedById");
-
-                    b.HasIndex("ExpenseId");
+                    b.HasIndex("UserId");
 
                     b.ToTable("Categories");
                 });
@@ -67,13 +65,16 @@ namespace moneyManager.Migrations
                     b.Property<DateTime>("Date")
                         .HasColumnType("datetime(6)");
 
+                    b.Property<DateTime>("DateCreated")
+                        .HasColumnType("datetime(6)");
+
                     b.Property<string>("Description")
                         .HasColumnType("longtext");
 
                     b.Property<string>("PaymentType")
                         .HasColumnType("longtext");
 
-                    b.Property<Guid?>("UserId")
+                    b.Property<Guid>("UserId")
                         .HasColumnType("char(36)");
 
                     b.HasKey("Id");
@@ -111,21 +112,8 @@ namespace moneyManager.Migrations
 
             modelBuilder.Entity("moneyManager.Models.Category", b =>
                 {
-                    b.HasOne("moneyManager.Models.User", "CreatedBy")
-                        .WithMany()
-                        .HasForeignKey("CreatedById");
-
-                    b.HasOne("moneyManager.Models.Expense", null)
-                        .WithMany("Category")
-                        .HasForeignKey("ExpenseId");
-
-                    b.Navigation("CreatedBy");
-                });
-
-            modelBuilder.Entity("moneyManager.Models.Expense", b =>
-                {
                     b.HasOne("moneyManager.Models.User", "User")
-                        .WithMany()
+                        .WithMany("Categories")
                         .HasForeignKey("UserId");
 
                     b.Navigation("User");
@@ -133,7 +121,20 @@ namespace moneyManager.Migrations
 
             modelBuilder.Entity("moneyManager.Models.Expense", b =>
                 {
-                    b.Navigation("Category");
+                    b.HasOne("moneyManager.Models.User", "User")
+                        .WithMany("Expenses")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("moneyManager.Models.User", b =>
+                {
+                    b.Navigation("Categories");
+
+                    b.Navigation("Expenses");
                 });
 #pragma warning restore 612, 618
         }

@@ -2,7 +2,6 @@ using Microsoft.AspNetCore.Mvc;
 using moneyManager.Repositories;
 using moneyManager.Models;
 using moneyManager.Dtos;
-using System.Threading.Tasks;
 
 namespace moneyManager.Controllers
 {
@@ -20,20 +19,21 @@ namespace moneyManager.Controllers
 
         // GET /expenses
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Expense>>> GetExpensesAsync() 
+        public async Task<ActionResult<IEnumerable<ExpenseDto>>> GetExpensesAsync() 
         { 
-            if (this.context.Expense == null) 
+            var expenses = await Task.FromResult(this.context.Expense.ToList<Expense>());
+            if (expenses == null)
             {
                 return NotFound();
             }
-
-            return await Task.FromResult(this.context.Expense.ToList<Expense>());
+            
+            return Ok(expenses.Select(expense => expense.AsDto()));
         }
 
 
         // GET /expenses/{id}
         [HttpGet("{id}")]
-        public async Task<ActionResult<Expense>> GetExpenseAsync(Guid id)
+        public async Task<ActionResult<ExpenseDto>> GetExpenseAsync(Guid id)
         {
             if (this.context.Expense is null) 
             {
@@ -47,27 +47,34 @@ namespace moneyManager.Controllers
                 return NotFound();
             }
 
-            return expense;
+            return expense.AsDto();
         }
 
         // POST /expense
         [HttpPost]
-        public async Task<ActionResult<Expense>> CreateExpenseAsync(CreateExpenseDto expense) 
+        public async Task<ActionResult<ExpenseDto>> CreateExpenseAsync(CreateExpenseDto expense) 
         {
+            var user = await this.context.Users.FindAsync(expense.UserId);
+            if (user == null)
+            {
+                return NotFound("User not found.");
+            }
+
             var actualExpense = new Expense() {
                 Id = Guid.NewGuid(),
                 Amount = expense.Amount,
-                Category = expense.Category,
                 PaymentType = expense.PaymentType,
+                Description = expense.Description,
                 Currency = expense.Currency,
+                UserId = expense.UserId,
                 Date = expense.Date,
-                Description = expense.Description
+                DateCreated = DateTime.Now
             };
 
             this.context.Expense.Add(actualExpense);
             await this.context.SaveChangesAsync();
 
-            return CreatedAtAction(nameof(GetExpenseAsync), new { id = actualExpense.Id }, actualExpense);
+            return CreatedAtAction(nameof(GetExpenseAsync), new { id = actualExpense.Id }, actualExpense.AsDto());
         }
 
         // PUT /expense/{id}
@@ -81,11 +88,10 @@ namespace moneyManager.Controllers
             }
 
             existingExpense.Amount = expense.Amount;
-            existingExpense.Category = expense.Category;
             existingExpense.PaymentType = expense.PaymentType;
+            existingExpense.Description = expense.Description;
             existingExpense.Currency = expense.Currency;
             existingExpense.Date = expense.Date;
-            existingExpense.Description = expense.Description;
 
             await this.context.SaveChangesAsync();
             
@@ -104,7 +110,7 @@ namespace moneyManager.Controllers
                 return NotFound();
             }
             
-            this.context.Expense.Remove(exisitingExpense); 
+            this.context.Expense.Remove(exisitingExpense);
             await this.context.SaveChangesAsync();
 
             return NoContent();
