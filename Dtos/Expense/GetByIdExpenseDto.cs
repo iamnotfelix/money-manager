@@ -1,5 +1,3 @@
-using moneyManager.Models;
-
 namespace moneyManager.Dtos
 {
     public record GetByIdExpenseDto
@@ -11,7 +9,6 @@ namespace moneyManager.Dtos
         public string? Currency { get; set; }
         public UserDto? User { get; set; }
         public DateTime Date { get; set; }
-        
-        // public ICollection<Category> Category { get; set; } = new List<Category>();
+        public ICollection<CategoryDto> Categories { get; set; } = new List<CategoryDto>();
     }
 }

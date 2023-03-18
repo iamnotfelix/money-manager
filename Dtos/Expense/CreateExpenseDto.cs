@@ -1,5 +1,4 @@
 using System.ComponentModel.DataAnnotations;
-using moneyManager.Models;
 
 namespace moneyManager.Dtos
 {
@@ -17,8 +16,8 @@ namespace moneyManager.Dtos
         public Guid UserId { get; set; }
         [Required]
         public DateTime Date { get; set; }
-        
-        // [Required]
-        // public ICollection<Category> Category { get; set; } = new List<Category>();
+        [Required]
+        public ICollection<ExpenseCategoryDto> ExpenseCategories { get; set; } 
+            = new List<ExpenseCategoryDto>();
     }
 }
