@@ -27,7 +27,7 @@ namespace moneyManager
                 Id = category.Id,
                 Name = category.Name,
                 Description = category.Description,
-                UserId = category.User!.Id
+                UserId = category.UserId
             };
         }
         
