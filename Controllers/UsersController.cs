@@ -87,8 +87,10 @@ namespace moneyManager.Controllers
                 return NotFound();
             }
 
-            existingUser.Name = user.Name;
-            existingUser.Password = user.Password;
+            existingUser.Name = user.Name is null ?
+                existingUser.Name : user.Name;
+            existingUser.Password = user.Password is null ?
+                existingUser.Password : user.Password;
 
             await this.context.SaveChangesAsync();
             
