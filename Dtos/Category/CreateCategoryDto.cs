@@ -1,5 +1,4 @@
 using System.ComponentModel.DataAnnotations;
-using moneyManager.Models;
 
 namespace moneyManager.Dtos
 {
@@ -10,8 +9,6 @@ namespace moneyManager.Dtos
         [Required]
         public string? Description { get; set; }
         [Required]
-        public User? CreatedBy { get; set; }
-        [Required]
-        public ICollection<Expense> Expenses { get; set; } = new List<Expense>();
+        public Guid UserId { get; set; }
     }
 }
