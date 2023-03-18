@@ -55,14 +55,7 @@ namespace moneyManager.Controllers
                 .Collection(c => c.ExpenseCategories)
                 .LoadAsync();
 
-            return new GetByIdCategoryDto
-            {
-                Id = category.Id,
-                Name = category.Name,
-                Description = category.Description,
-                User = category.User!.AsDto(),
-                Expenses = category.ExpenseCategories.Select(ec => ec.Expense!.AsDto()).ToList()
-            };
+            return category.AsGetByIdDto();
         }
 
         // POST /categories
@@ -86,7 +79,7 @@ namespace moneyManager.Controllers
             this.context.Categories.Add(actualCategory);
             await this.context.SaveChangesAsync();
 
-            return CreatedAtAction(nameof(GetCategoryAsync), new { id = actualCategory.Id }, actualCategory.AsDto());
+            return CreatedAtAction(nameof(GetCategoryAsync), new { id = actualCategory.Id }, actualCategory.AsGetByIdDto());
         }
 
         // PUT /categories/{id}

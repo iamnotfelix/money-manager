@@ -62,17 +62,7 @@ namespace moneyManager.Controllers
             }
 
 
-            return new GetByIdExpenseDto
-            {
-                Id = expense.Id,
-                Amount = expense.Amount,
-                PaymentType = expense.PaymentType,
-                Description = expense.Description,
-                Currency = expense.Currency,
-                User = expense.User!.AsDto(),
-                Date = expense.Date,
-                Categories = expense.ExpenseCategories.Select(e => e.Category!.AsDto()).ToList()
-            };
+            return expense.AsGetByIdDto();
         }
 
         // GET /expenses/filter/{nr}
@@ -133,7 +123,7 @@ namespace moneyManager.Controllers
                 await this.context.SaveChangesAsync();
             }
 
-            return CreatedAtAction(nameof(GetExpenseAsync), new { id = actualExpense.Id }, actualExpense.AsDto());
+            return CreatedAtAction(nameof(GetExpenseAsync), new { id = actualExpense.Id }, actualExpense.AsGetByIdDto());
         }
 
         // PUT /expenses/{id}
