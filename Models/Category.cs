@@ -7,10 +7,11 @@ namespace moneyManager.Models
         public Guid Id { get; init; }
         public string? Name { get; set; }
         public string? Description { get; set; }
-        public string? Color { get; set; }
         public DateTime DateCreated { get; set; }
-        
+
+        // Navigation properties
+        public Guid UserId { get; set; }
         public User? User { get; set; }
-        //public ICollection<Expense> Expenses { get; set; } = new List<Expense>();
+        public ICollection<ExpenseCategory> ExpenseCategories { get; set; } = new List<ExpenseCategory>();
     }
 }

@@ -14,6 +14,6 @@ namespace moneyManager.Models
         // Navigation propreties
         public Guid UserId { get; set; }
         public User? User { get; set; }
-        // public ICollection<Category> Category { get; set; } = new List<Category>();
+        public ICollection<ExpenseCategory> ExpenseCategories { get; set; } = new List<ExpenseCategory>();
     }
 }
