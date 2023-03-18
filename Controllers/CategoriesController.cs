@@ -99,8 +99,10 @@ namespace moneyManager.Controllers
                 return NotFound();
             }
 
-            existingCategory.Name = category.Name;
-            existingCategory.Description = category.Description;
+            existingCategory.Name = category.Name is null ?
+                existingCategory.Name : category.Name;
+            existingCategory.Description = category.Description is null ?
+                existingCategory.Description : category.Description;
 
             await this.context.SaveChangesAsync();
             
