@@ -33,7 +33,7 @@ namespace moneyManager.Controllers
 
         // GET /expenses/{id}
         [HttpGet("{id}")]
-        public async Task<ActionResult<UserDto>> GetUserAsync(Guid id)
+        public async Task<ActionResult<GetByIdUserDto>> GetUserAsync(Guid id)
         {
             if (this.context.Users is null) 
             {
@@ -46,8 +46,20 @@ namespace moneyManager.Controllers
             {
                 return NotFound();
             }
+            
+            this.context.Users.Entry(user)
+                .Collection(u => u.Expenses)
+                .Load();
+            
+            var expensesDto = user.Expenses.Select(e => e.AsDto()).ToList();
 
-            return user.AsDto();
+            return new GetByIdUserDto
+            {
+                Id = user.Id,
+                Username = user.Username,
+                Name = user.Name,
+                Expenses = expensesDto
+            };
         }
 
         // POST /expense
