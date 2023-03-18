@@ -17,7 +17,7 @@ namespace moneyManager.Controllers
         }
 
 
-        // GET /expenses
+        // GET /users
         [HttpGet]
         public async Task<ActionResult<IEnumerable<UserDto>>> GetUsersAsync() 
         { 
@@ -31,7 +31,7 @@ namespace moneyManager.Controllers
         }
 
 
-        // GET /expenses/{id}
+        // GET /users/{id}
         [HttpGet("{id}")]
         public async Task<ActionResult<GetByIdUserDto>> GetUserAsync(Guid id)
         {
@@ -47,22 +47,18 @@ namespace moneyManager.Controllers
                 return NotFound();
             }
             
-            this.context.Users.Entry(user)
+            await this.context.Users.Entry(user)
                 .Collection(u => u.Expenses)
-                .Load();
+                .LoadAsync();
             
-            var expensesDto = user.Expenses.Select(e => e.AsDto()).ToList();
+            await this.context.Users.Entry(user)
+                .Collection(u => u.Categories)
+                .LoadAsync();
 
-            return new GetByIdUserDto
-            {
-                Id = user.Id,
-                Username = user.Username,
-                Name = user.Name,
-                Expenses = expensesDto
-            };
+            return user.AsGetByIdDto();
         }
 
-        // POST /expense
+        // POST /users
         [HttpPost]
         public async Task<ActionResult<UserDto>> CreateUserAsync(CreateUserDto user) 
         {
@@ -78,10 +74,10 @@ namespace moneyManager.Controllers
             this.context.Users.Add(actualUser);
             await this.context.SaveChangesAsync();
 
-            return CreatedAtAction(nameof(GetUserAsync), new { id = actualUser.Id }, actualUser.AsDto());
+            return CreatedAtAction(nameof(GetUserAsync), new { id = actualUser.Id }, actualUser.AsGetByIdDto());
         }
 
-        // PUT /expense/{id}
+        // PUT /users/{id}
         [HttpPut("{id}")]
         public async Task<ActionResult> UpdateUserAsync(Guid id, UpdateUserDto user) 
         {
@@ -101,7 +97,7 @@ namespace moneyManager.Controllers
             return NoContent();
         }
 
-        // DELETE /expenses/{id}
+        // DELETE /users/{id}
         [HttpDelete("{id}")]
         public async Task<ActionResult> DeleteUserAsync(Guid id)
         {
