@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace moneyManager.Dtos
 {
-    public record CreateExpenseDto
+    public record CreateExpenseDto : IExpenseDto
     {
         [Required]
         public int Amount { get; set; }

@@ -1,6 +1,6 @@
 namespace moneyManager.Dtos
 {
-    public record ExpenseDto
+    public record ExpenseDto : IExpenseDto
     {
         public Guid Id { get; set; }
         public int Amount { get; set; }

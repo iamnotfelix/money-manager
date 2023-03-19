@@ -1,6 +1,6 @@
 namespace moneyManager.Dtos
 {
-    public record UpdateExpenseDto
+    public record UpdateExpenseDto : IExpenseDto
     {
         public int Amount { get; set; }
         public string? PaymentType { get; set; }
