@@ -1,10 +1,12 @@
 using Microsoft.EntityFrameworkCore;
+using moneyManager.Dtos;
 using moneyManager.Repositories;
+using moneyManager.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-
+builder.Services.AddScoped<IService<IExpenseDto>, ExpensesService>();
 builder.Services.AddControllers(options => options.SuppressAsyncSuffixInActionNames = false);
 builder.Services.AddDbContext<DatabaseContext>(options => options.UseMySQL(builder.Configuration.GetConnectionString("Default")!));
 

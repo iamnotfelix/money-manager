@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
-using moneyManager.Repositories;
-using moneyManager.Models;
 using moneyManager.Dtos;
+using moneyManager.Services;
+using moneyManager.Exceptions;
 
 namespace moneyManager.Controllers
 {
@@ -9,197 +9,102 @@ namespace moneyManager.Controllers
     [Route("api/[controller]")]
     public class ExpensesController : ControllerBase
     {
-        private readonly DatabaseContext context;
+        private readonly ExpensesService service;
 
-        public ExpensesController(DatabaseContext context) 
+        public ExpensesController(IService<IExpenseDto> service) 
         {
-            this.context = context;
+            this.service = (ExpensesService) service;
         }
 
 
         // GET /expenses
         [HttpGet]
         public async Task<ActionResult<IEnumerable<ExpenseDto>>> GetExpensesAsync() 
-        { 
-            var expenses = await Task.FromResult(this.context.Expenses.ToList<Expense>());
-            if (expenses == null)
+        {
+            try
             {
-                return NotFound();
+                var expenses = await this.service.GetAllAsync();
+                return Ok(expenses);
             }
-            
-            return Ok(expenses.Select(expense => expense.AsDto()));
+            catch (NotFoundException e)
+            {
+                return NotFound(e.Message);
+            }
         }
 
         // GET /expenses/{id}
         [HttpGet("{id}")]
         public async Task<ActionResult<GetByIdExpenseDto>> GetExpenseAsync(Guid id)
         {
-            if (this.context.Expenses is null) 
+            try
             {
-                return NotFound();
+                var expense = await this.service.GetByIdAsync(id);
+                return Ok(expense);
             }
-
-            var expense = await context.Expenses.FindAsync(id);
-
-            if (expense == null)
+            catch (NotFoundException e)
             {
-                return NotFound();
+                return NotFound(e.Message);
             }
-
-            await this.context.Entry(expense)
-                .Reference(e => e.User)
-                .LoadAsync();
-
-            await this.context.Entry(expense)
-                .Collection(e => e.ExpenseCategories)
-                .LoadAsync();
-            
-            foreach (var expenseCategory in expense.ExpenseCategories)
-            {
-                await this.context.Entry(expenseCategory)
-                    .Reference(ec => ec.Category)
-                    .LoadAsync();
-            }
-
-
-            return expense.AsGetByIdDto();
         }
 
         // GET /expenses/filter/{nr}
         [HttpGet("filter/{nr}")]
         public async Task<ActionResult<ExpenseDto>> GetExpensesHigherThan(int nr)
         {
-            if (this.context.Expenses is null)
+            try
             {
-                return NotFound();
+                var expenses = await this.service.GetExpensesHigherThan(nr);
+                return Ok(expenses);
             }
-
-            var expenses = await Task.FromResult(this.context.Expenses.Where(expense => expense.Amount > nr));
-            return Ok(expenses.Select(expense => expense.AsDto()));
+            catch (NotFoundException e)
+            {
+                return NotFound(e.Message);
+            }
         }
 
         // POST /expenses
         [HttpPost]
         public async Task<ActionResult<ExpenseDto>> CreateExpenseAsync(CreateExpenseDto expense) 
         {
-            var user = await this.context.Users.FindAsync(expense.UserId);
-            if (user == null)
+            try
             {
-                return NotFound("User not found.");
+                var newExpense = await this.service.AddAsync(expense);
+                return Ok(newExpense);
             }
-
-            var actualExpense = new Expense() 
+            catch (NotFoundException e)
             {
-                Id = Guid.NewGuid(),
-                Amount = expense.Amount,
-                PaymentType = expense.PaymentType,
-                Description = expense.Description,
-                Currency = expense.Currency,
-                Date = expense.Date,
-                DateCreated = DateTime.Now,
-                UserId = expense.UserId
-            };
-
-            this.context.Expenses.Add(actualExpense);
-            await this.context.SaveChangesAsync();
-
-            foreach (var expenseCategory in expense.ExpenseCategories)
-            {
-                var category = await this.context.Categories.FindAsync(expenseCategory.CategoryId);
-                if (category is null)
-                {
-                    return NotFound("Category not found.");
-                }
-
-                var actualExpenseCategory = new ExpenseCategory
-                {
-                    Notes = expenseCategory.Notes,
-                    DateCreated = DateTime.Now,
-                    ExpenseId = actualExpense.Id,
-                    CategoryId = expenseCategory.CategoryId
-                };
-
-                this.context.ExpenseCategories.Add(actualExpenseCategory);
-                await this.context.SaveChangesAsync();
+                return NotFound(e.Message);
             }
-
-            return CreatedAtAction(nameof(GetExpenseAsync), new { id = actualExpense.Id }, actualExpense.AsGetByIdDto());
         }
 
         // PUT /expenses/{id}
         [HttpPut("{id}")]
         public async Task<ActionResult> UpdateExpenseAsync(Guid id, UpdateExpenseDto expense) 
         {
-            var existingExpense = await this.context.Expenses.FindAsync(id);
-            if (existingExpense == null)
+            try
             {
-                return NotFound();
+                await this.service.UpdateAsync(id, expense);
+                return NoContent();
             }
-
-            existingExpense.Amount = expense.Amount is 0 ? 
-                existingExpense.Amount : expense.Amount;
-            existingExpense.PaymentType = expense.PaymentType is null ? 
-                existingExpense.PaymentType : expense.PaymentType;
-            existingExpense.Description = expense.Description is null ?
-                existingExpense.Description : expense.Description;
-            existingExpense.Currency = expense.Currency is null ?
-                existingExpense.Currency : expense.Currency;
-            existingExpense.Date = expense.Date == DateTime.MinValue ?
-                existingExpense.Date : expense.Date;
-
-            await this.context.SaveChangesAsync();
-            
-            // NOTE:  might have concurency problems
-
-            if (expense.ExpenseCategories.Count > 0)
+            catch (NotFoundException e)
             {
-                // Delete existing category relations
-                var toDeleteExpenseCategories = this.context.ExpenseCategories.Where(ec => ec.ExpenseId == existingExpense.Id);
-                foreach (var expenseCategory in toDeleteExpenseCategories)
-                {
-                    this.context.ExpenseCategories.Remove(expenseCategory);
-                }
-                await this.context.SaveChangesAsync();
-
-                // Add new category relations
-                foreach (var expenseCategory in expense.ExpenseCategories)
-                {
-                    var category = await this.context.Categories.FindAsync(expenseCategory.CategoryId);
-                    if (category is null)
-                    {
-                        return NotFound("Category not found.");
-                    }
-
-                    var newExpenseCategory = new ExpenseCategory
-                    {
-                        Notes = expenseCategory.Notes,
-                        DateCreated = DateTime.Now,
-                        ExpenseId = existingExpense.Id,
-                        CategoryId = expenseCategory.CategoryId
-                    };
-
-                    this.context.ExpenseCategories.Add(newExpenseCategory);
-                    await this.context.SaveChangesAsync();
-                }
+                return NotFound(e.Message);
             }
-
-            return NoContent();
         }
 
         // DELETE /expenses/{id}
         [HttpDelete("{id}")]
         public async Task<ActionResult> DeleteExpenseAsync(Guid id)
         {
-            var exisitingExpense = await this.context.Expenses.FindAsync(id);
-            if (exisitingExpense == null)
+            try
             {
-                return NotFound();
+                await this.service.DeleteAsync(id);
+                return NoContent();
             }
-            
-            this.context.Expenses.Remove(exisitingExpense);
-            await this.context.SaveChangesAsync();
-
-            return NoContent();
+            catch (NotFoundException e)
+            {
+                return NotFound(e.Message);
+            }
         }
     }
 }
