@@ -58,6 +58,48 @@ namespace moneyManager.Controllers
             return category.AsGetByIdDto();
         }
 
+        // GET /categories/ordered
+        [HttpGet("ordered")]
+        public async Task<ActionResult<IEnumerable<Category>>> GetCategoriesOrderedByTotalExpenseAmountAsync() 
+        { 
+            var categories = await Task.FromResult(this.context.Categories.ToList<Category>());
+            if (categories == null)
+            {
+                return NotFound();
+            }
+
+            var categoryTotalDtos = new List<CategoryTotalDto>();
+            foreach (var category in categories)
+            {
+                await this.context.Entry(category)
+                    .Collection(c => c.ExpenseCategories)
+                    .LoadAsync();
+
+                int total = 0;
+                foreach (var expenseCategory in category.ExpenseCategories)
+                {
+                    await this.context.Entry(expenseCategory)
+                        .Reference(ec => ec.Expense)
+                            .LoadAsync();
+                    
+                    total += expenseCategory.Expense!.Amount;
+                }
+
+                categoryTotalDtos.Add(
+                    new CategoryTotalDto
+                    {
+                        Id = category.Id,
+                        Name = category.Name,
+                        Description = category.Description,
+                        Total = total,
+                        UserId = category.UserId
+                    });
+            }
+            categoryTotalDtos = categoryTotalDtos.OrderBy(c => c.Total).ToList();
+            
+            return Ok(categoryTotalDtos);
+        }
+
         // POST /categories
         [HttpPost]
         public async Task<ActionResult<CategoryDto>> CreateCategoryAsync(CreateCategoryDto category) 
