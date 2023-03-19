@@ -11,8 +11,8 @@ using moneyManager.Repositories;
 namespace moneyManager.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    [Migration("20230318083234_Migration2")]
-    partial class Migration2
+    [Migration("20230319084113_Migration1")]
+    partial class Migration1
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -78,7 +78,7 @@ namespace moneyManager.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Expense");
+                    b.ToTable("Expenses");
                 });
 
             modelBuilder.Entity("moneyManager.Models.ExpenseCategory", b =>

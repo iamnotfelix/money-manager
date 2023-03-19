@@ -21,7 +21,7 @@ namespace moneyManager.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<ExpenseDto>>> GetExpensesAsync() 
         { 
-            var expenses = await Task.FromResult(this.context.Expense.ToList<Expense>());
+            var expenses = await Task.FromResult(this.context.Expenses.ToList<Expense>());
             if (expenses == null)
             {
                 return NotFound();
@@ -34,12 +34,12 @@ namespace moneyManager.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<GetByIdExpenseDto>> GetExpenseAsync(Guid id)
         {
-            if (this.context.Expense is null) 
+            if (this.context.Expenses is null) 
             {
                 return NotFound();
             }
 
-            var expense = await context.Expense.FindAsync(id);
+            var expense = await context.Expenses.FindAsync(id);
 
             if (expense == null)
             {
@@ -69,12 +69,12 @@ namespace moneyManager.Controllers
         [HttpGet("filter/{nr}")]
         public async Task<ActionResult<ExpenseDto>> GetExpensesHigherThan(int nr)
         {
-            if (this.context.Expense is null)
+            if (this.context.Expenses is null)
             {
                 return NotFound();
             }
 
-            var expenses = await Task.FromResult(this.context.Expense.Where(expense => expense.Amount > nr));
+            var expenses = await Task.FromResult(this.context.Expenses.Where(expense => expense.Amount > nr));
             return Ok(expenses.Select(expense => expense.AsDto()));
         }
 
@@ -100,7 +100,7 @@ namespace moneyManager.Controllers
                 UserId = expense.UserId
             };
 
-            this.context.Expense.Add(actualExpense);
+            this.context.Expenses.Add(actualExpense);
             await this.context.SaveChangesAsync();
 
             foreach (var expenseCategory in expense.ExpenseCategories)
@@ -130,7 +130,7 @@ namespace moneyManager.Controllers
         [HttpPut("{id}")]
         public async Task<ActionResult> UpdateExpenseAsync(Guid id, UpdateExpenseDto expense) 
         {
-            var existingExpense = await this.context.Expense.FindAsync(id);
+            var existingExpense = await this.context.Expenses.FindAsync(id);
             if (existingExpense == null)
             {
                 return NotFound();
@@ -190,13 +190,13 @@ namespace moneyManager.Controllers
         [HttpDelete("{id}")]
         public async Task<ActionResult> DeleteExpenseAsync(Guid id)
         {
-            var exisitingExpense = await this.context.Expense.FindAsync(id);
+            var exisitingExpense = await this.context.Expenses.FindAsync(id);
             if (exisitingExpense == null)
             {
                 return NotFound();
             }
             
-            this.context.Expense.Remove(exisitingExpense);
+            this.context.Expenses.Remove(exisitingExpense);
             await this.context.SaveChangesAsync();
 
             return NoContent();

@@ -75,7 +75,7 @@ namespace moneyManager.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Expense");
+                    b.ToTable("Expenses");
                 });
 
             modelBuilder.Entity("moneyManager.Models.ExpenseCategory", b =>
