@@ -68,8 +68,8 @@ namespace moneyManager.Controllers
         {
             try
             {
-                var newExpense = await this.service.AddAsync(expense);
-                return Ok(newExpense);
+                var newExpense = (GetByIdExpenseDto) await this.service.AddAsync(expense);
+                return CreatedAtAction(nameof(GetExpenseAsync), new { id = newExpense.Id }, newExpense);
             }
             catch (NotFoundException e)
             {
