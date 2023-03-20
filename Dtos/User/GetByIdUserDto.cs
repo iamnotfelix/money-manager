@@ -1,6 +1,6 @@
 namespace moneyManager.Dtos
 {
-    public record GetByIdUserDto
+    public record GetByIdUserDto : IUserDto
     {
         public Guid Id { get; set; }
         public string? Username { get; set; }

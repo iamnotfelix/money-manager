@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace moneyManager.Dtos
 {
-    public record CreateUserDto
+    public record CreateUserDto : IUserDto
     {
         [Required]
         public string? Username { get; set; }
