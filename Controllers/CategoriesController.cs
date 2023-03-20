@@ -2,6 +2,8 @@ using Microsoft.AspNetCore.Mvc;
 using moneyManager.Repositories;
 using moneyManager.Models;
 using moneyManager.Dtos;
+using moneyManager.Services;
+using moneyManager.Exceptions;
 
 namespace moneyManager.Controllers
 {
@@ -9,25 +11,26 @@ namespace moneyManager.Controllers
     [Route("api/[controller]")]
     public class CategoriesController : ControllerBase
     {
-        private readonly DatabaseContext context;
+        private readonly CategoriesService service;
 
-        public CategoriesController(DatabaseContext context) 
+        public CategoriesController(IService<ICategoyDto> service) 
         {
-            this.context = context;
+            this.service = (CategoriesService) service;
         }
-
 
         // GET /categories
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Category>>> GetCategoriesAsync() 
-        { 
-            var categories = await Task.FromResult(this.context.Categories.ToList<Category>());
-            if (categories == null)
+        {
+            try
             {
-                return NotFound();
+                var categories = await this.service.GetAllAsync();
+                return Ok(categories);
             }
-            
-            return Ok(categories.Select(category => category.AsDto()));
+            catch (NotFoundException e)
+            {
+                return NotFound(e.Message);
+            }
         }
 
 
@@ -35,131 +38,76 @@ namespace moneyManager.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<GetByIdCategoryDto>> GetCategoryAsync(Guid id)
         {
-            if (this.context.Categories is null) 
+            try
             {
-                return NotFound();
+                var category = await this.service.GetByIdAsync(id);
+                return Ok(category);
             }
-
-            var category = await context.Categories.FindAsync(id);
-
-            if (category == null)
+            catch (NotFoundException e)
             {
-                return NotFound();
+                return NotFound(e.Message);
             }
-
-            await this.context.Entry(category)
-                .Reference(c => c.User)
-                .LoadAsync();
-
-            await this.context.Entry(category)
-                .Collection(c => c.ExpenseCategories)
-                .LoadAsync();
-
-            return category.AsGetByIdDto();
         }
 
         // GET /categories/ordered
         [HttpGet("ordered")]
         public async Task<ActionResult<IEnumerable<Category>>> GetCategoriesOrderedByTotalExpenseAmountAsync() 
         { 
-            var categories = await Task.FromResult(this.context.Categories.ToList<Category>());
-            if (categories == null)
+            try
             {
-                return NotFound();
+                var categories = await this.service.GetCategoriesOrderedByTotalExpenseAmountAsync();
+                return Ok(categories);
             }
-
-            var categoryTotalDtos = new List<CategoryTotalDto>();
-            foreach (var category in categories)
+            catch (NotFoundException e)
             {
-                await this.context.Entry(category)
-                    .Collection(c => c.ExpenseCategories)
-                    .LoadAsync();
-
-                int total = 0;
-                foreach (var expenseCategory in category.ExpenseCategories)
-                {
-                    await this.context.Entry(expenseCategory)
-                        .Reference(ec => ec.Expense)
-                            .LoadAsync();
-                    
-                    total += expenseCategory.Expense!.Amount;
-                }
-
-                categoryTotalDtos.Add(
-                    new CategoryTotalDto
-                    {
-                        Id = category.Id,
-                        Name = category.Name,
-                        Description = category.Description,
-                        Total = total,
-                        UserId = category.UserId
-                    });
+                return NotFound(e.Message);
             }
-            categoryTotalDtos = categoryTotalDtos.OrderBy(c => c.Total).ToList();
-            
-            return Ok(categoryTotalDtos);
         }
 
         // POST /categories
         [HttpPost]
         public async Task<ActionResult<CategoryDto>> CreateCategoryAsync(CreateCategoryDto category) 
         {
-            var user = await this.context.Users.FindAsync(category.UserId);
-            if (user == null)
+            try
             {
-                return NotFound("User not found.");
+                var newCategory = (GetByIdCategoryDto) await this.service.AddAsync(category);
+                return CreatedAtAction(nameof(GetCategoryAsync), new { id = newCategory.Id }, newCategory);
             }
-
-            var actualCategory = new Category() {
-                Id = Guid.NewGuid(),
-                Name = category.Name,
-                Description = category.Description,
-                DateCreated = DateTime.Now,
-                UserId = category.UserId
-            };
-
-            this.context.Categories.Add(actualCategory);
-            await this.context.SaveChangesAsync();
-
-            return CreatedAtAction(nameof(GetCategoryAsync), new { id = actualCategory.Id }, actualCategory.AsGetByIdDto());
+            catch (NotFoundException e)
+            {
+                return NotFound(e.Message);
+            }
         }
 
         // PUT /categories/{id}
         [HttpPut("{id}")]
         public async Task<ActionResult> UpdateCategoryAsync(Guid id, UpdateCategoryDto category) 
         {
-            var existingCategory = await this.context.Categories.FindAsync(id);
-            if (existingCategory == null)
+            try
             {
-                return NotFound();
+                await this.service.UpdateAsync(id, category);
+                return NoContent();
+            }
+            catch (NotFoundException e)
+            {
+                return NotFound(e.Message);
             }
 
-            existingCategory.Name = category.Name is null ?
-                existingCategory.Name : category.Name;
-            existingCategory.Description = category.Description is null ?
-                existingCategory.Description : category.Description;
-
-            await this.context.SaveChangesAsync();
-            
-            // NOTE:  might have concurency problems
-
-            return NoContent();
         }
 
         // DELETE /categories/{id}
         [HttpDelete("{id}")]
         public async Task<ActionResult> DeleteCategoryAsync(Guid id)
         {
-            var exisitingCategory = await this.context.Categories.FindAsync(id);
-            if (exisitingCategory == null)
+            try
             {
-                return NotFound();
+                await this.service.DeleteAsync(id);
+                return NoContent();
             }
-            
-            this.context.Categories.Remove(exisitingCategory); 
-            await this.context.SaveChangesAsync();
-
-            return NoContent();
+            catch (NotFoundException e)
+            {
+                return NotFound(e.Message);
+            }
         }
     }
 }
