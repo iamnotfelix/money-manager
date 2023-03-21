@@ -12,5 +12,6 @@ namespace moneyManager.Dtos
         public string? Email { get; set; }
         [Required]
         public string? Password { get; set; }
+        public ICollection<Guid> ExpenseIds { get; set; } = new List<Guid>();
     }
 }

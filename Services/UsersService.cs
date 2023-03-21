@@ -56,6 +56,17 @@ namespace moneyManager.Services
                 DateCreated = DateTime.Now
             };
 
+            foreach (var expenseId in user.ExpenseIds)
+            {
+                var expense = await this.context.Expenses.FindAsync(expenseId);
+                if (expense is null)
+                {
+                    throw new NotFoundException("Expense not found.");
+                }
+
+                expense.UserId = actualUser.Id;
+            }
+
             this.context.Users.Add(actualUser);
             await this.context.SaveChangesAsync();
 
