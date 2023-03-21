@@ -64,6 +64,36 @@ namespace moneyManager.Controllers
             }
         }
 
+        // GET /categories/minimum
+        [HttpGet("minimum")]
+        public async Task<ActionResult<Category>> GetCategoryWithMinTotalExpenseAmountAsync() 
+        { 
+            try
+            {
+                var category = await this.service.GetCategoryWithMinTotalExpenseAmountAsync();
+                return Ok(category);
+            }
+            catch (NotFoundException e)
+            {
+                return NotFound(e.Message);
+            }
+        }
+
+        // GET /categories/maximum
+        [HttpGet("maximum")]
+        public async Task<ActionResult<Category>> GetCategoryWithMaxTotalExpenseAmountAsync() 
+        { 
+            try
+            {
+                var category = await this.service.GetCategoryWithMaxTotalExpenseAmountAsync();
+                return Ok(category);
+            }
+            catch (NotFoundException e)
+            {
+                return NotFound(e.Message);
+            }
+        }
+
         // POST /categories
         [HttpPost]
         public async Task<ActionResult<CategoryDto>> CreateCategoryAsync(CreateCategoryDto category) 

@@ -137,5 +137,101 @@ namespace moneyManager.Services
             
             return categoryTotalDtos;
         }
+
+        public async Task<ICategoyDto> GetCategoryWithMinTotalExpenseAmountAsync()
+        {
+            var categories = await Task.FromResult(this.context.Categories.ToList<Category>());
+            if (categories is null)
+            {
+                throw new NotFoundException("Category not found.");
+            }
+
+            CategoryTotalDto? minimumCategory = null;
+            int minimumTotal = Int32.MaxValue;
+            foreach (var category in categories)
+            {
+                await this.context.Entry(category)
+                    .Collection(c => c.ExpenseCategories)
+                    .LoadAsync();
+
+                int total = 0;
+                foreach (var expenseCategory in category.ExpenseCategories)
+                {
+                    await this.context.Entry(expenseCategory)
+                        .Reference(ec => ec.Expense)
+                            .LoadAsync();
+                    
+                    total += expenseCategory.Expense!.Amount;
+                }
+                
+                if (minimumTotal > total && total > 0)
+                {
+                    minimumTotal = total;
+                    minimumCategory = new CategoryTotalDto
+                    {
+                        Id = category.Id,
+                        Name = category.Name,
+                        Description = category.Description,
+                        Total = total,
+                        UserId = category.UserId
+                    };
+                }
+            }
+            
+            if (minimumCategory is null)
+            {
+                throw new NotFoundException("No category found.");
+            }
+
+            return minimumCategory;
+        }
+
+        public async Task<ICategoyDto> GetCategoryWithMaxTotalExpenseAmountAsync()
+        {
+            var categories = await Task.FromResult(this.context.Categories.ToList<Category>());
+            if (categories is null)
+            {
+                throw new NotFoundException("Category not found.");
+            }
+
+            CategoryTotalDto? maximumCategory = null;
+            int maximumTotal = Int32.MinValue;
+            foreach (var category in categories)
+            {
+                await this.context.Entry(category)
+                    .Collection(c => c.ExpenseCategories)
+                    .LoadAsync();
+
+                int total = 0;
+                foreach (var expenseCategory in category.ExpenseCategories)
+                {
+                    await this.context.Entry(expenseCategory)
+                        .Reference(ec => ec.Expense)
+                            .LoadAsync();
+                    
+                    total += expenseCategory.Expense!.Amount;
+                }
+                
+                if (maximumTotal < total && total > 0)
+                {
+                    maximumTotal = total;
+                    maximumCategory = new CategoryTotalDto
+                    {
+                        Id = category.Id,
+                        Name = category.Name,
+                        Description = category.Description,
+                        Total = total,
+                        UserId = category.UserId
+                    };
+                }
+            }
+            
+            if (maximumCategory is null)
+            {
+                throw new NotFoundException("No category found.");
+            }
+
+            return maximumCategory;
+        }
     }
 }
