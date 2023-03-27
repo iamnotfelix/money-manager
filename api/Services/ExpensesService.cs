@@ -72,6 +72,8 @@ namespace moneyManager.Services
                 UserId = expense.UserId
             };
 
+            actualExpense.Validate();
+
             this.context.Expenses.Add(actualExpense);
             await this.context.SaveChangesAsync();
 
@@ -106,6 +108,16 @@ namespace moneyManager.Services
             {
                 throw new NotFoundException("Expense not found.");
             }
+
+            var validationExpense = new Expense {
+                Amount = expense.Amount,
+                PaymentType = expense.PaymentType,
+                Description = expense.Description,
+                Currency = expense.Currency,
+                Date = expense.Date
+            };
+
+            validationExpense.Validate();
 
             existingExpense.Amount = expense.Amount is 0 ? 
                 existingExpense.Amount : expense.Amount;
