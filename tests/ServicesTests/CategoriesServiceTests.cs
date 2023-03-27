@@ -69,7 +69,6 @@ namespace tests.ServicesTests
 
             var categories = new List<Category> { category1, category2, category3 };
             this.context.Setup(x => x.Categories).ReturnsDbSet(categories);
-            //this.context.Setup(x => x.Entry<It.IsAnyType>(null))
 
             var result = (IEnumerable<CategoryTotalDto>) await this.service.GetCategoriesOrderedByTotalExpenseAmountAsync();
 
