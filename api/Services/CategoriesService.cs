@@ -62,6 +62,8 @@ namespace moneyManager.Services
                 UserId = category.UserId
             };
 
+            actualCategory.Validate();
+
             this.context.Categories.Add(actualCategory);
             await this.context.SaveChangesAsync();
 
@@ -76,6 +78,13 @@ namespace moneyManager.Services
             {
                 throw new NotFoundException("Category not found.");
             }
+
+            var validationCategory = new Category {
+                Name = category.Name,
+                Description = category.Description
+            };
+
+            validationCategory.Validate();
 
             existingCategory.Name = category.Name is null ?
                 existingCategory.Name : category.Name;
