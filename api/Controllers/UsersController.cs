@@ -61,6 +61,10 @@ namespace moneyManager.Controllers
             {
                 return NotFound(e.Message);
             }
+            catch (ValidationException e)
+            {
+                return ValidationProblem(e.Message);
+            }
         }
 
         // PUT /users/{id}
@@ -75,6 +79,10 @@ namespace moneyManager.Controllers
             catch (NotFoundException e)
             {
                 return NotFound(e.Message);
+            }
+            catch (ValidationException e)
+            {
+                return ValidationProblem(e.Message);
             }
         }
 

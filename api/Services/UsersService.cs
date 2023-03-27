@@ -56,6 +56,8 @@ namespace moneyManager.Services
                 DateCreated = DateTime.Now
             };
 
+            actualUser.Validate();
+
             foreach (var expenseId in user.ExpenseIds)
             {
                 var expense = await this.context.Expenses.FindAsync(expenseId);
@@ -81,6 +83,13 @@ namespace moneyManager.Services
             {
                 throw new NotFoundException("User not found.");
             }
+
+            var validationUser = new User {
+                Name = user.Name,
+                Password = user.Password
+            };
+
+            validationUser.Validate();
 
             existingUser.Name = user.Name is null ?
                 existingUser.Name : user.Name;
