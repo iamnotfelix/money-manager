@@ -1,0 +1,43 @@
+using moneyManager.Dtos;
+using moneyManager.Models;
+using moneyManager.Repositories;
+using moneyManager.Services;
+using Moq;
+using Moq.EntityFrameworkCore;
+using Xunit;
+
+namespace tests.ServicesTests
+{
+    public class ExpensesServiceTests
+    {
+        private readonly Mock<DatabaseContext> context;
+        private readonly ExpensesService service;
+
+        public ExpensesServiceTests()
+        {
+            this.context = new Mock<DatabaseContext>();
+            this.service = new ExpensesService(this.context.Object);
+        }
+
+        [Theory]
+        [InlineData(5)]
+        [InlineData(10)]
+        [InlineData(15)]
+        [InlineData(25)]
+        [InlineData(30)]
+        public async Task GetExpensesHigherThanTest(int number)
+        {
+            var expenses = new List<Expense> {
+                new Expense { Id = Guid.NewGuid(), Amount = 10 },
+                new Expense { Id = Guid.NewGuid(), Amount = 20 },
+                new Expense { Id = Guid.NewGuid(), Amount = 30 }
+            };
+            this.context.Setup(x => x.Expenses).ReturnsDbSet(expenses);
+
+            var result = await this.service.GetExpensesHigherThan(number);
+
+            Assert.NotNull(result);
+            Assert.All((IEnumerable<ExpenseDto>)result, expense => Assert.True(expense.Amount > number));
+        }
+    }
+}
