@@ -2,6 +2,7 @@ using moneyManager.Repositories;
 using moneyManager.Models;
 using moneyManager.Dtos;
 using moneyManager.Exceptions;
+using Microsoft.EntityFrameworkCore;
 
 
 namespace moneyManager.Services
@@ -109,7 +110,11 @@ namespace moneyManager.Services
 
         public async Task<IEnumerable<ICategoyDto>> GetCategoriesOrderedByTotalExpenseAmountAsync()
         {
-            var categories = await Task.FromResult(this.context.Categories.ToList<Category>());
+            var categories = await this.context.Categories
+                .Include(c => c.ExpenseCategories)
+                .ThenInclude(ec => ec.Expense)
+                .ToListAsync();
+
             if (categories is null)
             {
                 throw new NotFoundException("Category not found.");
@@ -118,17 +123,9 @@ namespace moneyManager.Services
             var categoryTotalDtos = new List<CategoryTotalDto>();
             foreach (var category in categories)
             {
-                await this.context.Entry(category)
-                    .Collection(c => c.ExpenseCategories)
-                    .LoadAsync();
-
                 int total = 0;
                 foreach (var expenseCategory in category.ExpenseCategories)
                 {
-                    await this.context.Entry(expenseCategory)
-                        .Reference(ec => ec.Expense)
-                            .LoadAsync();
-                    
                     total += expenseCategory.Expense!.Amount;
                 }
 

@@ -6,12 +6,13 @@ namespace moneyManager.Repositories
 {
     public class DatabaseContext : DbContext
     {
+        public DatabaseContext() {}
         public DatabaseContext(DbContextOptions<DatabaseContext> options) : base(options) { }
 
-        public DbSet<Expense> Expenses { get; set; } = null!;
-        public DbSet<User> Users { get; set; } = null!;
-        public DbSet<Category> Categories { get; set; } = null!;
-        public DbSet<ExpenseCategory> ExpenseCategories { get; set; } = null!;
+        public virtual DbSet<Expense> Expenses { get; set; } = null!;
+        public virtual DbSet<User> Users { get; set; } = null!;
+        public virtual DbSet<Category> Categories { get; set; } = null!;
+        public virtual DbSet<ExpenseCategory> ExpenseCategories { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder) 
         {
