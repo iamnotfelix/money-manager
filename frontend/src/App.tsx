@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Button } from '@mui/material'
-import { UsersTable } from '../Components/UsersTable'
-import { Navbar } from '../Components/Navbar'
+import { UsersTable } from './Components/UsersTable'
+import { Navbar } from './Components/Navbar'
 import { Box } from '@mui/system'
 
 function App() {
