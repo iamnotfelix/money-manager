@@ -25,16 +25,10 @@ export const UsersTable = () => {
     }, []);
 
     return (
-        // <div>
-        //     {loading && <Typography variant="h3" gutterBottom>Still loading</Typography>}
-        //     {!loading && users?.map((user: User, index) => (
-        //         <p>{index} {user.name} {user.username} {user.email}</p>
-        //         ))}
-        // </div>
         <div>
             {loading && <Typography variant="h3" gutterBottom>Still loading...</Typography>}
             <TableContainer component={Paper}>
-                <Table sx={{ minWidth: 650 }} aria-label="simple table">
+                <Table aria-label="simple table">
                     <TableHead>
                     <TableRow>
                         <TableCell align="left">Index</TableCell>
@@ -44,11 +38,10 @@ export const UsersTable = () => {
                     </TableHead>
                     <TableBody>
                     {!loading && users.map((user: User, index) => (
-                        <TableRow> 
-                        {/* key={row.name} sx={{ '&:last-child td, &:last-child th': { border: 0 } }} */}
-                        <TableCell align="left">{index}</TableCell>
-                        <TableCell align="center">{user.name}</TableCell>
-                        <TableCell align="center">{user.username}</TableCell>
+                        <TableRow key={index}> 
+                            <TableCell align="left" key={"index" + index.toString()}>{index}</TableCell>
+                            <TableCell align="center" key={"name" + index.toString()}>{user.name}</TableCell>
+                            <TableCell align="center" key={"username" + index.toString()}>{user.username}</TableCell>
                         </TableRow>
                     ))}
                     </TableBody>
