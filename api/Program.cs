@@ -8,6 +8,13 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
+builder.Services.AddCors(options => {
+    options.AddDefaultPolicy(policy => 
+    {
+        policy.WithOrigins("*");
+    });
+});
+
 builder.Services.AddScoped<IService<IExpenseDto>, ExpensesService>();
 builder.Services.AddScoped<IService<ICategoyDto>, CategoriesService>();
 builder.Services.AddScoped<IService<IUserDto>, UsersService>();
@@ -36,6 +43,8 @@ if (app.Environment.IsDevelopment())
 }
 
 //app.UseHttpsRedirection();
+
+app.UseCors();
 
 app.UseAuthorization();
 
