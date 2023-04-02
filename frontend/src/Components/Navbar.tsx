@@ -1,6 +1,7 @@
 import MonetizationOnIcon from '@mui/icons-material/MonetizationOn';
 import { AppBar, Button, Stack, Toolbar, Typography, styled } from '@mui/material'
 import { Container } from '@mui/system';
+import { Link } from 'react-router-dom'
 
 const StyledToolbar = styled(Toolbar) ({
     display:"flex",
@@ -9,6 +10,13 @@ const StyledToolbar = styled(Toolbar) ({
 
 const NavbarButton = styled(Button) ({
     color:"white"
+})
+
+const SimpleLink = styled(Link) ({
+    color: 'inherit',
+    padding: 0,
+    margin: 0,
+    textDecoration: 'none'
 })
 
 export const Navbar = () => {
@@ -22,14 +30,22 @@ export const Navbar = () => {
                 <Typography variant="h5" sx={{
                     display:{xs:"none", sm:"block"},
                     flexGrow: 1
-                }}>MoneyManager</Typography>
+                }}>
+                    <SimpleLink to="/">MoneyManager</SimpleLink>
+                </Typography>
                 <Container 
                     sx={{ flexGrow: 7}}
                 >
                     <Stack direction="row" spacing={12}>
-                        <NavbarButton variant='text'>Expenses</NavbarButton>
-                        <NavbarButton variant='text'>Categories</NavbarButton>
-                        <NavbarButton variant='text'>Users</NavbarButton>
+                        <SimpleLink to="/expenses">
+                            <NavbarButton variant='text'>Expenses</NavbarButton>
+                        </SimpleLink>
+                        <SimpleLink to="/categories">
+                            <NavbarButton variant='text'>Categories</NavbarButton>
+                        </SimpleLink>
+                        <SimpleLink to={"/users"}>
+                            <NavbarButton variant='text'>Users</NavbarButton>
+                        </SimpleLink>
                     </Stack>
                 </Container>
             </StyledToolbar>
