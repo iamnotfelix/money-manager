@@ -1,6 +1,5 @@
 import { Card, CardActions, CardContent, Container, IconButton, Paper, Stack, TableCell, TableContainer, TableRow, Typography } from "@mui/material";
 import React, { useState } from "react";
-import { useEffect } from "react";
 import { Link, useParams } from "react-router-dom";
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -25,7 +24,7 @@ export const ExpenseDetailed = () => {
         }
         fetchData();
         setLoading(false);
-    }, [loading]);
+    }, []);
 
     return (
             <Container>
