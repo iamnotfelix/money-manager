@@ -10,6 +10,7 @@ import { ExpenseAdd } from './Pages/ExpenseAdd'
 import { ExpenseDetailed } from './Pages/ExpenseDetailed'
 import { CategoryDetailed } from './Pages/CategoryDetailed'
 import { ExpenseUpdate } from './Pages/ExpenseUpdate'
+import { ExpenseDelete } from './Pages/ExpenseDelete'
 
 function App() {
   return (
@@ -22,6 +23,7 @@ function App() {
 			<Route path='/expenses/:id' element={<ExpenseDetailed/>}></Route>
 			<Route path='/expenses/add' element={<ExpenseAdd/>}></Route>
 			<Route path='/expenses/:id/update' element={<ExpenseUpdate/>}></Route>
+			<Route path='/expenses/:id/delete' element={<ExpenseDelete/>}></Route>
 
 			<Route path='/users' element={<Users/>}></Route>
 			<Route path='/users/:id' element={<UserDetailed/>}></Route>
