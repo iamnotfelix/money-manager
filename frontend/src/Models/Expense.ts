@@ -1,3 +1,4 @@
+import { Category } from "./Category";
 import { User } from "./User";
 
 export interface Expense {
@@ -9,4 +10,5 @@ export interface Expense {
     userId: string;
     user: User;
     date: Date;
+    categories: Category[];
 }

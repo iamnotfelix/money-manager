@@ -9,6 +9,7 @@ import Paper from '@mui/material/Paper';
 import { Box, Typography, styled } from '@mui/material';
 import { Expense } from '../Models/Expense';
 import { Link } from 'react-router-dom'
+import CreateIcon from '@mui/icons-material/Create';
 
 
 export const ExpensesTable = () => {
@@ -56,7 +57,8 @@ export const ExpensesTable = () => {
                         <TableCell align="center">Description</TableCell>
                         <TableCell align="center">Currency</TableCell>
                         <TableCell align="center">Date</TableCell>
-                        <TableCell align="center">Username</TableCell>
+                        <TableCell align="center">User</TableCell>
+                        <TableCell align="center"></TableCell>
                     </TableRow>
                     </TableHead>
                     <TableBody>
@@ -69,7 +71,10 @@ export const ExpensesTable = () => {
                             <TableCell align="center" key={"currency" + index.toString()}>{expense.currency}</TableCell>
                             <TableCell align="center" key={"date" + index.toString()}>{expense.date.toString()}</TableCell>
                             <TableCell align="center" key={"username" + index.toString()}>
-                                <SimpleLink to={`/users/${expense.user.id}`}>{expense.user.username}</SimpleLink>
+                                <SimpleLink to={`/users/${expense.user.id}`}> <Typography color="secondary">{expense.user.username}</Typography></SimpleLink>
+                            </TableCell>
+                            <TableCell>
+                                <SimpleLink to={`/expenses/${expense.id}`}><CreateIcon/></SimpleLink>
                             </TableCell>
                         </TableRow>
                     ))}

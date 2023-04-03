@@ -8,7 +8,7 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { User } from "../Models/User";
 import { useNavigate } from "react-router-dom";
 
-export const ExpenseAdd = () => {
+export const ExpenseUpdate = () => {
     const [amount, setAmount] = useState(0);
     const [paymentType, setPaymentType] = useState("Revolut");
     const [description, setDescription] = useState("");
