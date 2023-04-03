@@ -1,25 +1,23 @@
-import { Box, Button, Checkbox, FormControlLabel, FormGroup, MenuItem, TextField, Typography } from "@mui/material"
+import { Box, Button, FormGroup, MenuItem, TextField } from "@mui/material"
 import * as React from 'react';
 import { useState } from "react"
 import { DateField } from '@mui/x-date-pickers/DateField';
 import dayjs, { Dayjs } from "dayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import { useNavigate, useParams } from "react-router-dom";
-import { Category } from "../Models/Category";
+import { User } from "../../Models/User";
+import { useNavigate } from "react-router-dom";
 
-export const ExpenseUpdate = () => {
-    const params = useParams();
-
+export const ExpenseAdd = () => {
     const [amount, setAmount] = useState(0);
     const [paymentType, setPaymentType] = useState("Revolut");
     const [description, setDescription] = useState("");
     const [currency, setCurrency] = useState("Lei");
     const [date, setDate] = useState<Dayjs | null>(dayjs('2023-01-1'));
+    const [userId, setUserId] = useState("");
 
     const [loading, setLoading] = React.useState(false);
-    const [categories, setAllCategories] = React.useState([]);
-    const [checkedCategories, setChecked] = React.useState<Boolean[]>([]);
+    const [users, setUsers] = useState([]);
 
     const currencies = [ { value: 'Lei', label: 'Lei' }, { value: 'Euro', label: 'Euro' } ];
     const paymentTypes = [ { value:"Cash", label:"Cash" }, { value:"BT", label:"BT" }, { value:"Revolut", label:"Revolut" }, { value:"Alpha", label:"Alpha" } ];
@@ -27,20 +25,14 @@ export const ExpenseUpdate = () => {
 
     React.useEffect(() => {
         setLoading(true);
-
-        const fetchCategories = async () => {
-            const data = await fetch(`http://localhost:5000/api/categories`);
-            const res = await data.json();
-            setAllCategories(res);
-
-            const tmp = new Array(res.length).fill(false);
-            setChecked(tmp);
+        const fetchData = async () => {
+            const data = await fetch("http://localhost:5000/api/users");
+            const users = await data.json();
+            setUsers(users);
         }
-
-        fetchCategories();
-
+        fetchData();
         setLoading(false);
-    }, [params.id])
+    }, [])
 
     const navigate = useNavigate();
 
@@ -50,17 +42,12 @@ export const ExpenseUpdate = () => {
             paymentType: paymentType,
             description: description,
             currency: currency,
-            date: date,
-            expenseCategories: categories.filter((_, index) => {
-                return checkedCategories[index]
-            }).map((category: Category) => {
-                return {
-                    categoryId: category.id
-                };
-            })
+            userId: userId,
+            date: date
         }
-        const response = await window.fetch(`http://localhost:5000/api/expenses/${params.id}`, {
-            method: 'PUT',
+        console.log(JSON.stringify(body))
+        const response = await window.fetch("http://localhost:5000/api/expenses", {
+            method: 'POST',
             mode: 'cors',
             headers: {
                 'content-type': 'application/json',  
@@ -68,21 +55,24 @@ export const ExpenseUpdate = () => {
             body: JSON.stringify(body)
         });
         
-        // TODO: Handle bad response
+        navigate("/expenses");
 
-        navigate(`/expenses/${params.id}`);
+        
+        // //handle failure
+        const {data, errors} = await response.json()
+        console.log(data, errors);
+        if (response.ok) {
+           console.log("ok");
+        } else {
+            //const error = new Error(errors?.map(e => e.message).join('\n') ?? 'unknown')
+            //return Promise.reject(error)
+        }
+
+        // console.log(amount, paymentType, description, currency, date?.toString(), userId) ;
     }
-
-    const handleCheckBoxChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        checkedCategories[parseInt(event.target.name)] = event.target.checked;
-        setChecked(checkedCategories);
-    };
-    
 
     return (
         <Box>
-            {loading && <Typography variant="h3" gutterBottom>Still loading...</Typography>}
-            {!loading &&
             <FormGroup sx={{ display: "flex", alignItems: "center"}}>
                 <TextField
                     type="number"
@@ -146,13 +136,23 @@ export const ExpenseUpdate = () => {
                         sx={{m: 2, width: "25ch"}}
                         />
                 </LocalizationProvider>
-                <FormGroup>
-                    {categories?.map((category: Category, index) => (
-                        <FormControlLabel key={index} control={<Checkbox onChange={handleCheckBoxChange} name={index.toString()}/>} label={category.name} />
+                <TextField
+                    select
+                    label="User"
+                    // defaultValue=""
+                    required
+                    onChange={e => setUserId(e.target.value)}
+                    // helperText="Please select your currency"
+                    sx={{m: 2, width: "25ch"}}
+                >
+                    {users.map((option: User) => (
+                        <MenuItem key={option.id} value={option.id}>
+                        {option.username}
+                        </MenuItem>
                     ))}
-                </FormGroup>
-                <Button variant="outlined" color="primary" type="submit" sx={{m: 4, width: "25ch"}} onClick={handleSubmit}>Update</Button>
-            </FormGroup>}
+                </TextField>
+                <Button variant="outlined" color="primary" type="submit" sx={{m: 4, width: "25ch"}} onClick={handleSubmit}>Add</Button>
+            </FormGroup>
         </Box>
     );
 }

@@ -1,5 +1,5 @@
 import { Container, IconButton, Stack, Typography } from "@mui/material";
-import { ExpensesTable } from "../Components/ExpensesTable";
+import { ExpensesTable } from "../../Components/ExpensesTable";
 import AddIcon from '@mui/icons-material/Add';
 import { Link } from "react-router-dom";
 

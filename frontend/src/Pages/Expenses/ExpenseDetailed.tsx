@@ -4,8 +4,8 @@ import { Link, useParams } from "react-router-dom";
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import { Expense } from "../Models/Expense";
-import { Category } from "../Models/Category";
+import { Expense } from "../../Models/Expense";
+import { Category } from "../../Models/Category";
 
 
 export const ExpenseDetailed = () => {
