@@ -11,6 +11,7 @@ import { ExpenseDetailed } from './Pages/Expenses/ExpenseDetailed'
 import { CategoryDetailed } from './Pages/Categories/CategoryDetailed'
 import { ExpenseUpdate } from './Pages/Expenses/ExpenseUpdate'
 import { ExpenseDelete } from './Pages/Expenses/ExpenseDelete'
+import { ExpenseFilter } from './Pages/Expenses/ExpenseFilter'
 
 function App() {
   return (
@@ -24,6 +25,7 @@ function App() {
 			<Route path='/expenses/add' element={<ExpenseAdd/>}></Route>
 			<Route path='/expenses/:id/update' element={<ExpenseUpdate/>}></Route>
 			<Route path='/expenses/:id/delete' element={<ExpenseDelete/>}></Route>
+			<Route path='/expenses/filter' element={<ExpenseFilter/>}></Route>
 
 			<Route path='/users' element={<Users/>}></Route>
 			<Route path='/users/:id' element={<UserDetailed/>}></Route>

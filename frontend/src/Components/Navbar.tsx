@@ -40,6 +40,9 @@ export const Navbar = () => {
                         <SimpleLink to="/expenses">
                             <NavbarButton variant='text'>Expenses</NavbarButton>
                         </SimpleLink>
+                        <SimpleLink to="/expenses/filter">
+                            <NavbarButton variant='text'>Expenses Filter</NavbarButton>
+                        </SimpleLink>
                         <SimpleLink to="/categories">
                             <NavbarButton variant='text'>Categories</NavbarButton>
                         </SimpleLink>
