@@ -80,6 +80,28 @@ namespace moneyManager.Controllers
                 return ValidationProblem(e.Message);
             }
         }
+        
+        // POST /expenses/bulk
+        [HttpPost("bulk")]
+        public async Task<ActionResult> CreateBulkExpensesAsync(ICollection<CreateExpenseDto> expenses) 
+        {
+            try
+            {
+                foreach (CreateExpenseDto expense in expenses) 
+                {
+                    var newExpense = (GetByIdExpenseDto) await this.service.AddAsync(expense);
+                }
+                return NoContent();
+            }
+            catch (NotFoundException e)
+            {
+                return NotFound(e.Message);
+            }
+            catch (ValidationException e)
+            {
+                return ValidationProblem(e.Message);
+            }
+        }
 
         // PUT /expenses/{id}
         [HttpPut("{id}")]
