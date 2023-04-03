@@ -23,10 +23,10 @@ export const ExpenseFilter = () => {
     React.useEffect(() => {
         setLoading(true);
         const fetchData = async () => {
-            const data = await fetch(`http://localhost:5000/api/expenses/filter/${filterValue}`);
+            const data = await fetch(import.meta.env.VITE_REACT_API_BACKEND + `/api/expenses/filter/${filterValue}`);
             const expenses = await data.json();
             const expensesWithUsers: Expense[] = await Promise.all(expenses.map(async (expense: Expense) => {
-                const data = await fetch(`http://localhost:5000/api/users/${expense.userId}`);
+                const data = await fetch(import.meta.env.VITE_REACT_API_BACKEND + `/api/users/${expense.userId}`);
                 const user = await data.json();
                 const fullExpense: Expense = expense;
                 fullExpense.user = user;

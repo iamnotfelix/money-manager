@@ -8,7 +8,7 @@ export const ExpenseDelete = () => {
 
 	const handleDelete = async (event: { preventDefault: () => void }) => {
 		event.preventDefault();
-        const response = fetch(`http://localhost:5000/api/expenses/${params.id}`,{
+        const response = fetch(import.meta.env.VITE_REACT_API_BACKEND + `/api/expenses/${params.id}`,{
             method: 'DELETE',
             mode: 'cors'
         });
