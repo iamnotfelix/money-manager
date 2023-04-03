@@ -1,4 +1,4 @@
-import { Box, Button, FormGroup, MenuItem, TextField } from "@mui/material"
+import { Box, Button, Checkbox, FormControlLabel, FormGroup, MenuItem, TextField } from "@mui/material"
 import * as React from 'react';
 import { useState } from "react"
 import { DateField } from '@mui/x-date-pickers/DateField';
@@ -7,6 +7,7 @@ import { LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { User } from "../../Models/User";
 import { useNavigate } from "react-router-dom";
+import { Category } from "../../Models/Category";
 
 export const ExpenseAdd = () => {
     const [amount, setAmount] = useState(0);
@@ -18,6 +19,8 @@ export const ExpenseAdd = () => {
 
     const [loading, setLoading] = React.useState(false);
     const [users, setUsers] = useState([]);
+    const [categories, setAllCategories] = React.useState([]);
+    const [checkedCategories, setChecked] = React.useState<Boolean[]>([]);
 
     const currencies = [ { value: 'Lei', label: 'Lei' }, { value: 'Euro', label: 'Euro' } ];
     const paymentTypes = [ { value:"Cash", label:"Cash" }, { value:"BT", label:"BT" }, { value:"Revolut", label:"Revolut" }, { value:"Alpha", label:"Alpha" } ];
@@ -30,7 +33,19 @@ export const ExpenseAdd = () => {
             const users = await data.json();
             setUsers(users);
         }
+
+        const fetchCategories = async () => {
+            const data = await fetch(`http://localhost:5000/api/categories`);
+            const res = await data.json();
+            setAllCategories(res);
+
+            const tmp = new Array(res.length).fill(false);
+            setChecked(tmp);
+        }
+
         fetchData();
+        fetchCategories();
+
         setLoading(false);
     }, [])
 
@@ -43,9 +58,16 @@ export const ExpenseAdd = () => {
             description: description,
             currency: currency,
             userId: userId,
-            date: date
+            date: date,
+            expenseCategories: categories.filter((_, index) => {
+                return checkedCategories[index]
+            }).map((category: Category) => {
+                return {
+                    categoryId: category.id
+                };
+            })
         }
-        console.log(JSON.stringify(body))
+        // console.log(JSON.stringify(body))
         const response = await window.fetch("http://localhost:5000/api/expenses", {
             method: 'POST',
             mode: 'cors',
@@ -67,9 +89,12 @@ export const ExpenseAdd = () => {
             //const error = new Error(errors?.map(e => e.message).join('\n') ?? 'unknown')
             //return Promise.reject(error)
         }
-
-        // console.log(amount, paymentType, description, currency, date?.toString(), userId) ;
     }
+
+    const handleCheckBoxChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        checkedCategories[parseInt(event.target.name)] = event.target.checked;
+        setChecked(checkedCategories);
+    };
 
     return (
         <Box>
@@ -151,6 +176,11 @@ export const ExpenseAdd = () => {
                         </MenuItem>
                     ))}
                 </TextField>
+                <FormGroup>
+                    {categories?.map((category: Category, index) => (
+                        <FormControlLabel key={index} control={<Checkbox onChange={handleCheckBoxChange} name={index.toString()}/>} label={category.name} />
+                    ))}
+                </FormGroup>
                 <Button variant="outlined" color="primary" type="submit" sx={{m: 4, width: "25ch"}} onClick={handleSubmit}>Add</Button>
             </FormGroup>
         </Box>
