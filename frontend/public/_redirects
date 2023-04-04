@@ -1,0 +1,5 @@
+/api/expenses/* http://ec2-16-170-204-77.eu-north-1.compute.amazonaws.com/api/expenses/:splat 200!
+/api/expenses/filter/* http://ec2-16-170-204-77.eu-north-1.compute.amazonaws.com/api/expenses/filter/:splat 200!
+/api/users/* http://ec2-16-170-204-77.eu-north-1.compute.amazonaws.com/api/users/:splat 200!
+/api/categories/* http://ec2-16-170-204-77.eu-north-1.compute.amazonaws.com/api/users/:splat 200!
+/*    /index.html   200

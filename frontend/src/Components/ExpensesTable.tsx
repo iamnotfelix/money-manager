@@ -6,16 +6,18 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
-import { Box, Typography, styled } from '@mui/material';
+import { Box, Button, Typography, styled } from '@mui/material';
 import { Expense } from '../Models/Expense';
 import { Link } from 'react-router-dom'
 import CreateIcon from '@mui/icons-material/Create';
+import FilterListIcon from '@mui/icons-material/FilterList';
 
 
 export const ExpensesTable = () => {
     const initExpenses: any[] = [];
     const [loading, setLoading] = React.useState(false);
     const [expenses, setExpenses] = React.useState(initExpenses);
+    const [sort, setSort] = React.useState(false);
 
     React.useEffect(() => {
         setLoading(true);
@@ -30,12 +32,30 @@ export const ExpensesTable = () => {
                 const date: Date = fullExpense.date;
                 return fullExpense;
             }));
-
-            setExpenses(expensesWithUsers);
+            
+            if (sort) {
+                let sortedArray = expensesWithUsers;
+                for (let i = 0; i < sortedArray.length - 1; ++i) {
+                    let min = i;
+                    for (let j = i + 1; j < sortedArray.length; ++j) {
+                        if (sortedArray[j].amount < sortedArray[min].amount) {
+                            min=j; 
+                        }
+                    }
+                    if (min != i) {
+                        let tmp = sortedArray[i]; 
+                        sortedArray[i] = sortedArray[min];
+                        sortedArray[min] = tmp;      
+                   }
+                }
+                setExpenses(sortedArray);
+            } else {
+                setExpenses(expensesWithUsers);
+            }
         }
         fetchData();
         setLoading(false);
-    }, []);
+    }, [sort]);
 
     const SimpleLink = styled(Link) ({
         color: 'inherit',
@@ -43,6 +63,11 @@ export const ExpensesTable = () => {
         margin: 0,
         textDecoration: 'none'
     })
+
+    const handleClick = () => {
+        setSort(!sort);
+        console.log(sort);
+    }
 
     return (
         <Box width="1100px">
@@ -52,7 +77,10 @@ export const ExpensesTable = () => {
                     <TableHead>
                     <TableRow>
                         <TableCell align="left">Index</TableCell>
-                        <TableCell align="center">Amount</TableCell>
+                        <TableCell align="center">
+                            <Button onClick={handleClick}><FilterListIcon/></Button>
+                            Amount
+                        </TableCell>
                         <TableCell align="center">Payment Type</TableCell>
                         <TableCell align="center">Description</TableCell>
                         <TableCell align="center">Currency</TableCell>
