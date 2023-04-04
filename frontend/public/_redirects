@@ -1,8 +1,5 @@
-/api/expenses http://ec2-16-170-204-77.eu-north-1.compute.amazonaws.com/api/expenses 200!
-/api/expenses/:id http://ec2-16-170-204-77.eu-north-1.compute.amazonaws.com/api/expenses/:id 200!
-/api/expenses/filter/:nr http://ec2-16-170-204-77.eu-north-1.compute.amazonaws.com/api/expenses/filter/:nr 200!
-/api/users http://ec2-16-170-204-77.eu-north-1.compute.amazonaws.com/api/users 200!
-/api/users/:id http://ec2-16-170-204-77.eu-north-1.compute.amazonaws.com/api/users/:id 200!
-/api/categories http://ec2-16-170-204-77.eu-north-1.compute.amazonaws.com/api/categories 200!
-/api/categories/:id http://ec2-16-170-204-77.eu-north-1.compute.amazonaws.com/api/categories/:id 200!
-/*    /index.html   200
+/expenses/* http://ec2-16-170-204-77.eu-north-1.compute.amazonaws.com/api/expenses/:splat 200!
+/expenses/filter http://ec2-16-170-204-77.eu-north-1.compute.amazonaws.com/api/expenses/filter/:nr 200!
+/expenses/* http://ec2-16-170-204-77.eu-north-1.compute.amazonaws.com/api/users/:splat 200!
+/expenses/* http://ec2-16-170-204-77.eu-north-1.compute.amazonaws.com/api/categories/:splat 200!
+/*    /index.html   200s
