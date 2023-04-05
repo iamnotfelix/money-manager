@@ -22,10 +22,10 @@ export const ExpensesTable = () => {
     React.useEffect(() => {
         setLoading(true);
         const fetchData = async () => {
-            const data = await fetch(import.meta.env.VITE_REACT_API_BACKEND + `/api/expenses`);
+            const data = await fetch(import.meta.env.VITE_REACT_API_BACKEND + `/expenses`);
             const expenses = await data.json();
             const expensesWithUsers: Expense[] = await Promise.all(expenses.map(async (expense: Expense) => {
-                const data = await fetch(import.meta.env.VITE_REACT_API_BACKEND + `/api/users/${expense.userId}`);
+                const data = await fetch(import.meta.env.VITE_REACT_API_BACKEND + `/users/${expense.userId}`);
                 const user = await data.json();
                 const fullExpense: Expense = expense;
                 fullExpense.user = user;
@@ -66,7 +66,6 @@ export const ExpensesTable = () => {
 
     const handleClick = () => {
         setSort(!sort);
-        console.log(sort);
     }
 
     return (

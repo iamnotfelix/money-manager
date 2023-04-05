@@ -18,7 +18,7 @@ export const ExpenseDetailed = () => {
     React.useEffect(() => {
         setLoading(true);
         const fetchData = async () => {
-            const data = await fetch(import.meta.env.VITE_REACT_API_BACKEND + `/api/expenses/${params.id}`);
+            const data = await fetch(import.meta.env.VITE_REACT_API_BACKEND + `/expenses/${params.id}`);
             const res = await data.json();
             setExpense(res);
         }

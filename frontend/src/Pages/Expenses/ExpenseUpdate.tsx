@@ -29,7 +29,7 @@ export const ExpenseUpdate = () => {
         setLoading(true);
 
         const fetchCategories = async () => {
-            const data = await fetch(import.meta.env.VITE_REACT_API_BACKEND + `/api/categories`);
+            const data = await fetch(import.meta.env.VITE_REACT_API_BACKEND + `/categories`);
             const res = await data.json();
             setAllCategories(res);
 
@@ -59,7 +59,7 @@ export const ExpenseUpdate = () => {
                 };
             })
         }
-        const response = await window.fetch(import.meta.env.VITE_REACT_API_BACKEND + `/api/expenses/${params.id}`, {
+        const response = await window.fetch(import.meta.env.VITE_REACT_API_BACKEND + `/expenses/${params.id}`, {
             method: 'PUT',
             mode: 'cors',
             headers: {

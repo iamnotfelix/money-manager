@@ -29,13 +29,13 @@ export const ExpenseAdd = () => {
     React.useEffect(() => {
         setLoading(true);
         const fetchData = async () => {
-            const data = await fetch(import.meta.env.VITE_REACT_API_BACKEND + `/api/users`);
+            const data = await fetch(import.meta.env.VITE_REACT_API_BACKEND + `/users`);
             const users = await data.json();
             setUsers(users);
         }
 
         const fetchCategories = async () => {
-            const data = await fetch(import.meta.env.VITE_REACT_API_BACKEND + `/api/categories`);
+            const data = await fetch(import.meta.env.VITE_REACT_API_BACKEND + `/categories`);
             const res = await data.json();
             setAllCategories(res);
 
@@ -68,7 +68,7 @@ export const ExpenseAdd = () => {
             })
         }
         // console.log(JSON.stringify(body))
-        const response = await window.fetch(import.meta.env.VITE_REACT_API_BACKEND + `/api/expenses`, {
+        const response = await window.fetch(import.meta.env.VITE_REACT_API_BACKEND + `/expenses`, {
             method: 'POST',
             mode: 'cors',
             headers: {

@@ -16,7 +16,7 @@ export const UsersTable = () => {
 
     React.useEffect(() => {
         setLoading(true);
-        fetch(import.meta.env.VITE_REACT_API_BACKEND + `/api/users`)
+        fetch(import.meta.env.VITE_REACT_API_BACKEND + `/users`)
             .then(data => data.json())
             .then(res => {
                 setUsers(res);
