@@ -4,5 +4,6 @@ export interface Category {
     id: string;
     name: string;
     description: string;
+    userId: string;
     user: User;
 }
