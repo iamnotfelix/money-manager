@@ -14,6 +14,7 @@ import { ExpenseDelete } from './Pages/Expenses/ExpenseDelete'
 import { ExpenseFilter } from './Pages/Expenses/ExpenseFilter'
 import { CategoryAdd } from './Pages/Categories/CategoryAdd'
 import { CategoryUpdate } from './Pages/Categories/CategoryUpdate'
+import { CategoryDelete } from './Pages/Categories/CategoryDelete'
 
 function App() {
   return (
@@ -36,6 +37,7 @@ function App() {
 			<Route path='/categories/:id' element={<CategoryDetailed/>}></Route>
 			<Route path='/categories/add' element={<CategoryAdd/>}></Route>
 			<Route path='/categories/:id/update' element={<CategoryUpdate/>}></Route>
+			<Route path='/categories/:id/delete' element={<CategoryDelete/>}></Route>
       	</Routes>
     </Box>
   )
