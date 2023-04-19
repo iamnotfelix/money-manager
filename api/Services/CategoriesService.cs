@@ -43,6 +43,13 @@ namespace moneyManager.Services
                 .Collection(c => c.ExpenseCategories)
                 .LoadAsync();
 
+            foreach (var expenseCategory in category.ExpenseCategories)
+            {
+                await this.context.Entry(expenseCategory)
+                    .Reference(ec => ec.Expense)
+                    .LoadAsync();
+            }
+
             return category.AsGetByIdDto();
         }
 
