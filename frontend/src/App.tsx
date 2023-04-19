@@ -16,6 +16,7 @@ import { CategoryAdd } from './Pages/Categories/CategoryAdd'
 import { CategoryUpdate } from './Pages/Categories/CategoryUpdate'
 import { CategoryDelete } from './Pages/Categories/CategoryDelete'
 import { UserAdd } from './Pages/Users/UserAdd'
+import { UserUpdate } from './Pages/Users/UserUpdate'
 
 function App() {
   return (
@@ -34,6 +35,7 @@ function App() {
 			<Route path='/users' element={<Users/>}></Route>
 			<Route path='/users/:id' element={<UserDetailed/>}></Route>
 			<Route path='/users/add' element={<UserAdd/>}></Route>
+			<Route path='/users/:id/update' element={<UserUpdate/>}></Route>
 			
 			<Route path='/categories' element={<Categories/>}></Route>
 			<Route path='/categories/:id' element={<CategoryDetailed/>}></Route>
