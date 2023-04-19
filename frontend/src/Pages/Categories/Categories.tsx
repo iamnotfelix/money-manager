@@ -21,7 +21,7 @@ export const Categories = () => {
             }}
                 >
                 <Typography variant="h2">Categories</Typography>
-                <Link to={"/category/add"}>
+                <Link to={"/categories/add"}>
                     <IconButton size="large">
                         <AddIcon fontSize="large"/>
                     </IconButton>
