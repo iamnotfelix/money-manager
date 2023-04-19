@@ -75,6 +75,7 @@ namespace moneyManager
                 Id = user.Id,
                 Username = user.Username,
                 Name = user.Name,
+                Email = user.Email,
                 Expenses = user.Expenses.Select(e => e.AsDto()).ToList(),
                 Categories = user.Categories.Select(e => e.AsDto()).ToList()
             };
