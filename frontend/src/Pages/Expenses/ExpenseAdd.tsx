@@ -67,10 +67,12 @@ export const ExpenseAdd = () => {
         setAmountError(false);
         setDescriptionError(false);
         setDateError(false);
+        setUserError(false);
 
         setAmountText("");
         setDescriptionText("MAX 250 characters");
         setDateText("");
+        setUserText("");
         
         if (amount < 0) {
             setAmountError(true);
