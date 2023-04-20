@@ -1,4 +1,4 @@
-import { Box, Button, FormGroup, TextField } from "@mui/material"
+import { Box, Button, FormGroup, Stack, TextField, Typography } from "@mui/material"
 import { useEffect, useState } from "react"
 import { useNavigate, useParams } from "react-router-dom";
 import { Category } from "../../Models/Category";
@@ -83,6 +83,8 @@ export const CategoryUpdate = () => {
 
     return (
         <Box>
+            {loading && <Stack alignItems="center" mt={4}><Typography variant="h3" gutterBottom>Still loading...</Typography></Stack>}
+            {!loading &&
             <FormGroup sx={{ display: "flex", alignItems: "center"}}>
                 <TextField
                     type="text"
@@ -116,7 +118,7 @@ export const CategoryUpdate = () => {
                     sx={{m: 2, width: "50ch"}}
                 />
                 <Button variant="outlined" color="primary" type="submit" sx={{m: 4, width: "25ch"}} onClick={handleSubmit}>Update</Button>
-            </FormGroup>
+            </FormGroup>}
         </Box>
     );
 }
