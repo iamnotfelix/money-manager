@@ -33,7 +33,7 @@ export const CategoryUpdate = () => {
     const [descriptionError, setDescriptionError] = useState(false);
 
     const [nameText, setNameText] = useState("");
-    const [descriptionText, setDescriptionText] = useState("");
+    const [descriptionText, setDescriptionText] = useState("MAX 250 characters");
 
     const validate = () => {
         let valid = true;
@@ -113,6 +113,8 @@ export const CategoryUpdate = () => {
                         setDescriptionError(false);
                         setDescriptionText("MAX 250 characters");
                     }}
+                    error={descriptionError}
+                    helperText={descriptionText}
                     value={description}
                     fullWidth
                     sx={{m: 2, width: "50ch"}}
