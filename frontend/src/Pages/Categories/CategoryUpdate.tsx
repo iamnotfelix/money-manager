@@ -1,6 +1,7 @@
 import { Box, Button, FormGroup, TextField } from "@mui/material"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useNavigate, useParams } from "react-router-dom";
+import { Category } from "../../Models/Category";
 
 export const CategoryUpdate = () => {
     const params = useParams();
@@ -8,7 +9,59 @@ export const CategoryUpdate = () => {
     const [name, setName] = useState("");
     const [description, setDescription] = useState("");
 
+    const [loading, setLoading] = useState(false);
+
+    useEffect(() => {
+        setLoading(true);
+
+        const fetchCategory = async () => {
+            const data = await fetch(import.meta.env.VITE_REACT_API_BACKEND + `/categories/${params.id}`);
+            const res = await data.json();
+            const category: Category = res;
+            setName(category.name);
+            setDescription(category.description);
+        }
+
+        fetchCategory();
+
+        setLoading(false);
+    }, [params.id]);
+
     const navigate = useNavigate();
+
+    const [nameError, setNameError] = useState(false);
+    const [descriptionError, setDescriptionError] = useState(false);
+
+    const [nameText, setNameText] = useState("");
+    const [descriptionText, setDescriptionText] = useState("");
+
+    const validate = () => {
+        let valid = true;
+        
+        setNameError(false);
+        setDescriptionError(false);
+
+        setNameText("");
+        setDescriptionText("MAX 250 characters");
+        
+        if (!(/^[a-zA-Z ]+$/).test(name)) {
+            setNameError(true);
+            setNameText("Name must contain only letters and spaces.");
+            valid = false;
+        }
+        if (description.length > 250) {
+            setDescriptionError(true);
+            setDescriptionText("Description must be less than 250 characters.");
+            valid = false;
+        }
+        if (description.length == 0) {
+            setDescriptionError(true);
+            setDescriptionText("Description cannot be empty.");
+            valid = false;
+        }
+
+        return valid;
+    }
 
     const handleSubmit = async () => {
         const body = {
@@ -26,8 +79,6 @@ export const CategoryUpdate = () => {
         });
         
         navigate("/categories");
-        
-        // handle failure
     }
 
     return (
@@ -38,7 +89,13 @@ export const CategoryUpdate = () => {
                     variant='outlined'
                     color='primary'
                     label="Name"
-                    onChange={e => setName(e.target.value)}
+                    onChange={e => {
+                        setName(e.target.value);
+                        setNameError(false);
+                        setNameText("");
+                    }}
+                    error={nameError}
+                    helperText={nameText}
                     fullWidth
                     value={name}
                     required
@@ -49,7 +106,11 @@ export const CategoryUpdate = () => {
                     variant='outlined'
                     color='primary'
                     label="Description"
-                    onChange={e => setDescription(e.target.value)}
+                    onChange={e => {
+                        setDescription(e.target.value);
+                        setDescriptionError(false);
+                        setDescriptionText("MAX 250 characters");
+                    }}
                     value={description}
                     fullWidth
                     sx={{m: 2, width: "50ch"}}
