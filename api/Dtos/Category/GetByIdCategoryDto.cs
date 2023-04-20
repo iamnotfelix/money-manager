@@ -1,6 +1,6 @@
 namespace moneyManager.Dtos
 {
-    public record GetByIdCategoryDto : ICategoyDto
+    public record GetByIdCategoryDto : ICategoryDto
     {
         public Guid Id { get; set; }
         public string? Name { get; set; }

@@ -1,6 +1,6 @@
 namespace moneyManager.Dtos
 {
-    public interface ICategoyDto
+    public interface ICategoryDto
     {
         
     }

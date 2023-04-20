@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace moneyManager.Dtos
 {
-    public record CreateCategoryDto : ICategoyDto
+    public record CreateCategoryDto : ICategoryDto
     {
         [Required]
         public string? Name { get; set; }

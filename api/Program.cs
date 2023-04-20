@@ -23,7 +23,7 @@ builder.Services.AddCors(options => {
 });
 
 builder.Services.AddScoped<IService<IExpenseDto>, ExpensesService>();
-builder.Services.AddScoped<IService<ICategoyDto>, CategoriesService>();
+builder.Services.AddScoped<IService<ICategoryDto>, CategoriesService>();
 builder.Services.AddScoped<IService<IUserDto>, UsersService>();
 
 builder.Services.AddControllers(options => options.SuppressAsyncSuffixInActionNames = false);
