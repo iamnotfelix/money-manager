@@ -4,6 +4,10 @@ using moneyManager.Dtos;
 using moneyManager.Repositories;
 using moneyManager.Services;
 
+// Load enviroment variables 
+
+DotNetEnv.Env.Load();
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -23,7 +27,8 @@ builder.Services.AddScoped<IService<ICategoyDto>, CategoriesService>();
 builder.Services.AddScoped<IService<IUserDto>, UsersService>();
 
 builder.Services.AddControllers(options => options.SuppressAsyncSuffixInActionNames = false);
-builder.Services.AddDbContext<DatabaseContext>(options => options.UseMySQL(builder.Configuration.GetConnectionString("Default")!));
+// builder.Services.AddDbContext<DatabaseContext>(options => options.UseMySQL(builder.Configuration.GetConnectionString("Default")!));
+builder.Services.AddDbContext<DatabaseContext>(options => options.UseMySQL(Environment.GetEnvironmentVariable("CONNECTION_STRING")!));
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
