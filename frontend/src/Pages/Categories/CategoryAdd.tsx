@@ -26,7 +26,56 @@ export const CategoryAdd = () => {
 
     const navigate = useNavigate();
 
+    const [nameError, setNameError] = useState(false);
+    const [descriptionError, setDescriptionError] = useState(false);
+    const [userError, setUserError] = useState(false);
+
+    const [nameText, setNameText] = useState("");
+    const [descriptionText, setDescriptionText] = useState("");
+    const [userText, setUserText] = useState("");
+
+    const validate = () => {
+        let valid = true;
+        
+        setNameError(false);
+        setDescriptionError(false);
+        setUserError(false);
+
+        setNameText("");
+        setDescriptionText("MAX 250 characters");
+        setUserText("");
+        
+        if (!(/^[a-zA-Z ]+$/).test(name)) {
+            setNameError(true);
+            setNameText("Name must contain only letters and spaces.");
+            valid = false;
+        }
+        if (description.length > 250) {
+            setDescriptionError(true);
+            setDescriptionText("Description must be less than 250 characters.");
+            valid = false;
+        }
+        if (description.length == 0) {
+            setDescriptionError(true);
+            setDescriptionText("Description cannot be empty.");
+            valid = false;
+        }
+        if (userId.length == 0) {
+            setUserError(true);
+            setUserText("You must select a user.")
+            valid = false;
+        }
+
+        return valid;
+    }
+
     const handleSubmit = async () => {
+        const valid = validate();
+
+        if (!valid) {
+            return;
+        }
+
         const body = {
             name: name,
             description: description,
@@ -43,9 +92,6 @@ export const CategoryAdd = () => {
         });
         
         navigate("/categories");
-
-        
-        // //handle failure
     }
 
     return (
@@ -58,7 +104,13 @@ export const CategoryAdd = () => {
                     variant='outlined'
                     color='primary'
                     label="Name"
-                    onChange={e => setName(e.target.value)}
+                    onChange={e => {
+                        setName(e.target.value);
+                        setNameError(false);
+                        setNameText("");
+                    }}
+                    error={nameError}
+                    helperText={nameText}
                     fullWidth
                     value={name}
                     required
@@ -69,7 +121,13 @@ export const CategoryAdd = () => {
                     variant='outlined'
                     color='primary'
                     label="Description"
-                    onChange={e => setDescription(e.target.value)}
+                    onChange={e => {
+                        setDescription(e.target.value);
+                        setDescriptionError(false);
+                        setDescriptionText("MAX 250 characters");
+                    }}
+                    error={descriptionError}
+                    helperText={descriptionText}
                     value={description}
                     fullWidth
                     sx={{m: 2, width: "50ch"}}
@@ -78,7 +136,13 @@ export const CategoryAdd = () => {
                     select
                     label="User"
                     required
-                    onChange={e => setUserId(e.target.value)}
+                    onChange={e => {
+                        setUserId(e.target.value);
+                        setUserError(false);
+                        setUserText("");
+                    }}
+                    error={userError}
+                    helperText={userText}
                     sx={{m: 2, width: "25ch"}}
                 >
                     {users.map((option: User) => (
