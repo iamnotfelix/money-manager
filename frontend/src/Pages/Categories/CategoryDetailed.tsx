@@ -78,9 +78,9 @@ export const CategoryDetailed = () => {
                                 </TableCell>
                                 <TableCell>
                                     {category?.expenses.map((expense: Expense, index) => (
-                                        <Stack direction="row">
-                                            <Typography key={index} component={Link} to={`/expenses/${expense.id}`} variant="subtitle1" color="secondary" sx={{textDecoration: "none", pr: 3}}>{expense.amount}</Typography>
-                                            <Typography key={index} component={Link} to={`/expenses/${expense.id}`} variant="subtitle1" color="secondary" sx={{textDecoration: "none", pr: 3}}>{expense.description}</Typography>
+                                        <Stack direction="row" key={index}>
+                                            <Typography component={Link} to={`/expenses/${expense.id}`} variant="subtitle1" color="secondary" sx={{textDecoration: "none", pr: 3}}>{expense.amount}</Typography>
+                                            <Typography component={Link} to={`/expenses/${expense.id}`} variant="subtitle1" color="secondary" sx={{textDecoration: "none", pr: 3}}>{expense.description}</Typography>
                                         </Stack>
                                     ))}
                                 </TableCell>
