@@ -1,4 +1,3 @@
-import * as React from 'react';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
@@ -6,78 +5,91 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
-import { Box, Button, Typography, styled } from '@mui/material';
+import { Box, Button, IconButton, Stack, Typography, styled } from '@mui/material';
 import { Expense } from '../Models/Expense';
 import { Link } from 'react-router-dom'
 import CreateIcon from '@mui/icons-material/Create';
 import FilterListIcon from '@mui/icons-material/FilterList';
+import { useState, useEffect } from 'react';
+import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft';
+import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
 
 
 export const ExpensesTable = () => {
     const initExpenses: any[] = [];
-    const [loading, setLoading] = React.useState(false);
-    const [expenses, setExpenses] = React.useState(initExpenses);
-    const [sort, setSort] = React.useState(false);
+    const [expenses, setExpenses] = useState(initExpenses);
 
-    React.useEffect(() => {
+    const [loading, setLoading] = useState(false);
+    const [sort, setSort] = useState(false);
+
+	const pageSize = 5;
+	const [next, setNext] = useState("");
+	const [previous, setPrevious] = useState("");
+	const [current, setCurrent] = useState(import.meta.env.VITE_REACT_API_BACKEND + `/expenses?pageNumber=1&pageSize=${pageSize}`)
+	const [previousDisabled, setPreviousDisabled] = useState(false);
+	const [nextDisabled, setNextDisabled] = useState(false);
+
+    useEffect(() => {
         setLoading(true);
         const fetchData = async () => {
-            const data = await fetch(import.meta.env.VITE_REACT_API_BACKEND + `/expenses`);
-            const expenses = await data.json();
-            const expensesWithUsers: Expense[] = await Promise.all(expenses.map(async (expense: Expense) => {
+            const data = await fetch(current);
+            const res = await data.json();
+			const expensesWithUsers: Expense[] = await Promise.all(res.data.map(async (expense: Expense) => {
                 const data = await fetch(import.meta.env.VITE_REACT_API_BACKEND + `/users/${expense.userId}`);
                 const user = await data.json();
-                const fullExpense: Expense = expense;
-                fullExpense.user = user;
-                const date: Date = fullExpense.date;
-                return fullExpense;
+                expense.user = user;
+                return expense;
             }));
-            
-            if (sort) {
-                let sortedArray = expensesWithUsers;
-                for (let i = 0; i < sortedArray.length - 1; ++i) {
-                    let min = i;
-                    for (let j = i + 1; j < sortedArray.length; ++j) {
-                        if (sortedArray[j].amount < sortedArray[min].amount) {
-                            min=j; 
-                        }
-                    }
-                    if (min != i) {
-                        let tmp = sortedArray[i]; 
-                        sortedArray[i] = sortedArray[min];
-                        sortedArray[min] = tmp;      
-                   }
-                }
-                setExpenses(sortedArray);
-            } else {
-                setExpenses(expensesWithUsers);
-            }
+            setExpenses(expensesWithUsers);
+			const previousPage = res.previousPage ? res.previousPage : "";
+			const nextPage = res.nextPage ? res.nextPage : "";
+			setPrevious(previousPage);
+			setNext(nextPage);
+			setPreviousDisabled(previousPage.length > 0 ? false : true);
+			setNextDisabled(nextPage.toString().length > 0 ? false : true);
         }
         fetchData();
         setLoading(false);
-    }, [sort]);
+    }, [current]);
 
-    const SimpleLink = styled(Link) ({
+	useEffect(() => {
+		let sortedArray = [...expenses].sort((x: Expense, y: Expense) => {
+			return x.amount - y.amount;
+		});
+		setExpenses(sortedArray);
+	}, [sort])
+
+    const handleClickSort = () => {
+        setSort(!sort);
+    }
+
+	const handleClickPrevious = () => {
+		setCurrent(previous);
+	}
+
+	const handleClickNext = () => {
+		setCurrent(next);
+	}
+
+	const SimpleLink = styled(Link) ({
         color: 'inherit',
         padding: 0,
         margin: 0,
         textDecoration: 'none'
-    })
-
-    const handleClick = () => {
-        setSort(!sort);
-    }
+    });
 
     return (
         <Box width="1100px">
-            {loading && <Typography variant="h3" gutterBottom>Still loading...</Typography>}
+            {loading && <Stack alignItems="center" mt={4}><Typography variant="h3" gutterBottom>Still loading...</Typography></Stack>}
+            {!loading &&
+			<Box>
             <TableContainer component={Paper}>
                 <Table aria-label="simple table">
                     <TableHead>
                     <TableRow>
                         <TableCell align="left">Index</TableCell>
                         <TableCell align="center">
-                            <Button onClick={handleClick}><FilterListIcon/></Button>
+                            <Button onClick={handleClickSort}><FilterListIcon/></Button>
                             Amount
                         </TableCell>
                         <TableCell align="center">Payment Type</TableCell>
@@ -91,7 +103,7 @@ export const ExpensesTable = () => {
                     <TableBody>
                     {!loading && expenses.map((expense: Expense, index) => (
                         <TableRow key={index}> 
-                            <TableCell align="left" key={"index" + index.toString()}>{index}</TableCell>
+                            <TableCell align="left" key={"index" + index.toString()}>{index + 1}</TableCell>
                             <TableCell align="center" key={"amount" + index.toString()}>{expense.amount}</TableCell>
                             <TableCell align="center" key={"paymentType" + index.toString()}>{expense.paymentType}</TableCell>
                             <TableCell align="left" key={"description" + index.toString()}>{expense.description}</TableCell>
@@ -108,6 +120,15 @@ export const ExpensesTable = () => {
                     </TableBody>
                 </Table>
             </TableContainer>
+            <Stack direction='row' justifyContent="center" m={4}>
+				<IconButton size="large" onClick={handleClickPrevious} disabled={previousDisabled}>
+                    <KeyboardArrowLeftIcon fontSize="large"/>
+                </IconButton>
+				<IconButton size="large" onClick={handleClickNext} disabled={nextDisabled}>
+                    <KeyboardArrowRightIcon fontSize="large"/>
+                </IconButton>
+            </Stack>
+			</Box>}
         </Box>
     );
 }
