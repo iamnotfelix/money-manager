@@ -1,4 +1,3 @@
-import * as React from 'react';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
@@ -6,39 +5,68 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
-import { Box, Container, IconButton, TextField, Typography, styled } from '@mui/material';
+import { Box, Container, IconButton, Stack, TextField, Typography, styled } from '@mui/material';
 import { Expense } from '../../Models/Expense';
 import { Link } from 'react-router-dom'
 import CreateIcon from '@mui/icons-material/Create';
 import AddIcon from '@mui/icons-material/Add';
+import { useEffect, useState } from 'react';
+import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft';
+import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
 
 
 export const ExpenseFilter = () => {
     const initExpenses: any[] = [];
-    const [loading, setLoading] = React.useState(false);
-    const [expenses, setExpenses] = React.useState(initExpenses);
-    const [filterValue, setFilterValue] = React.useState(-1);
+    const [expenses, setExpenses] = useState(initExpenses);
+    
+    const [loading, setLoading] = useState(false);
+    const [filterValue, setFilterValue] = useState(-1);
 
+    const pageSize = 5;
+	const [next, setNext] = useState("");
+	const [previous, setPrevious] = useState("");
+	const [current, setCurrent] = useState(import.meta.env.VITE_REACT_API_BACKEND + `/expenses/filter/-1?pageNumber=1&pageSize=${pageSize}`)
+	const [previousDisabled, setPreviousDisabled] = useState(false);
+	const [nextDisabled, setNextDisabled] = useState(false);
 
-    React.useEffect(() => {
+    useEffect(() => {
         setLoading(true);
         const fetchData = async () => {
-            const data = await fetch(import.meta.env.VITE_REACT_API_BACKEND + `/expenses/filter/${filterValue}`);
-            const expenses = await data.json();
-            const expensesWithUsers: Expense[] = await Promise.all(expenses.map(async (expense: Expense) => {
+            const data = await fetch(current);
+            const res = await data.json();
+            const expensesWithUsers: Expense[] = await Promise.all(res.data.map(async (expense: Expense) => {
                 const data = await fetch(import.meta.env.VITE_REACT_API_BACKEND + `/users/${expense.userId}`);
                 const user = await data.json();
-                const fullExpense: Expense = expense;
-                fullExpense.user = user;
-                const date: Date = fullExpense.date;
-                return fullExpense;
+                expense.user = user;
+                return expense;
             }));
-
             setExpenses(expensesWithUsers);
+            const previousPage = res.previousPage ? res.previousPage : "";
+			const nextPage = res.nextPage ? res.nextPage : "";
+			setPrevious(previousPage);
+			setNext(nextPage);
+			setPreviousDisabled(previousPage.length > 0 ? false : true);
+			setNextDisabled(nextPage.toString().length > 0 ? false : true);
         }
         fetchData();
         setLoading(false);
-    }, [filterValue]);
+    }, [current]);
+
+    useEffect(() => {
+        setCurrent(import.meta.env.VITE_REACT_API_BACKEND + `/expenses/filter/${filterValue}?pageNumber=1&pageSize=${pageSize}`)
+    }, [filterValue])
+
+    const handleNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setFilterValue(e.target.value == "" ? 0 : parseInt(e.target.value));
+    }
+
+    const handleClickPrevious = () => {
+		setCurrent(previous);
+	}
+
+	const handleClickNext = () => {
+		setCurrent(next);
+	}
 
     const SimpleLink = styled(Link) ({
         color: 'inherit',
@@ -75,7 +103,8 @@ export const ExpenseFilter = () => {
                         variant="outlined"
                         color="primary"
                         label="Filter Amount"
-                        onChange={e => setFilterValue(parseInt(e.target.value))}
+                        defaultValue={0}
+                        onChange={handleNumberChange}
                     ></TextField>
                     <Link to={"/expenses/add"}>
                         <IconButton size="large">
@@ -86,7 +115,9 @@ export const ExpenseFilter = () => {
             </Container>
             
             <Box width="1100px">
-                {loading && <Typography variant="h3" gutterBottom>Still loading...</Typography>}
+                {loading && <Stack alignItems="center" mt={4}><Typography variant="h3" gutterBottom>Still loading...</Typography></Stack>}
+                {!loading &&
+                <Box>
                 <TableContainer component={Paper}>
                     <Table aria-label="simple table">
                         <TableHead>
@@ -104,7 +135,7 @@ export const ExpenseFilter = () => {
                         <TableBody>
                         {!loading && expenses.map((expense: Expense, index) => (
                             <TableRow key={index}> 
-                                <TableCell align="left" key={"index" + index.toString()}>{index}</TableCell>
+                                <TableCell align="left" key={"index" + index.toString()}>{index + 1}</TableCell>
                                 <TableCell align="center" key={"amount" + index.toString()}>{expense.amount}</TableCell>
                                 <TableCell align="center" key={"paymentType" + index.toString()}>{expense.paymentType}</TableCell>
                                 <TableCell align="left" key={"description" + index.toString()}>{expense.description}</TableCell>
@@ -121,6 +152,15 @@ export const ExpenseFilter = () => {
                         </TableBody>
                     </Table>
                 </TableContainer>
+                <Stack direction='row' justifyContent="center" m={4}>
+                    <IconButton size="large" onClick={handleClickPrevious} disabled={previousDisabled}>
+                        <KeyboardArrowLeftIcon fontSize="large"/>
+                    </IconButton>
+                    <IconButton size="large" onClick={handleClickNext} disabled={nextDisabled}>
+                        <KeyboardArrowRightIcon fontSize="large"/>
+                    </IconButton>
+                </Stack>
+                </Box>}
             </Box>
         </Container>
     );
