@@ -190,10 +190,23 @@ namespace moneyManager.Services
             await this.context.SaveChangesAsync();
         }
 
-        public async Task<IEnumerable<IExpenseDto>> GetExpensesHigherThan(int nr)
+        public async Task<PagedResponse<IEnumerable<IExpenseDto>>> GetExpensesHigherThan(int nr, PaginationFilter filter, string route)
         {
-            var expenses = await Task.FromResult(this.context.Expenses.Where(expense => expense.Amount > nr));
-            return expenses.Select(expense => expense.AsDto());   
+            var expenses = await this.context.Expenses
+                .Where(expense => expense.Amount > nr)
+                .Skip((filter.PageNumber - 1) * filter.PageSize)
+                .Take(filter.PageSize)
+                .ToListAsync();
+
+            if (expenses is null)
+            {
+                throw new NotFoundException("Expenses not found.");
+            }
+
+            var totalRecords = await this.context.Expenses.Where(expense => expense.Amount > nr).CountAsync();
+            var expensesDtos = expenses.Select(expense => expense.AsDto());
+
+            return PagedResponse<IExpenseDto>.CreatePagedReponse(expensesDtos, filter, totalRecords, uriBuilder, route);
         }
     }
 }
