@@ -51,12 +51,13 @@ namespace moneyManager.Controllers
 
         // GET /expenses/filter/{nr}
         [HttpGet("filter/{nr}")]
-        public async Task<ActionResult<ExpenseDto>> GetExpensesHigherThan(int nr)
+        public async Task<ActionResult<PagedResponse<IEnumerable<ExpenseDto>>>> GetExpensesHigherThan(int nr, [FromQuery] PaginationFilter paginationFilter)
         {
             try
             {
-                var expenses = await this.service.GetExpensesHigherThan(nr);
-                return Ok(expenses);
+                var expenses = await this.service.GetExpensesHigherThan(nr, paginationFilter, Request.Path.Value!);
+                var castedExpenses = new PagedResponse<IEnumerable<ExpenseDto>>(expenses);
+                return Ok(castedExpenses);
             }
             catch (NotFoundException e)
             {
