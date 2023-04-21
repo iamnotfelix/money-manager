@@ -37,10 +37,10 @@ namespace tests.ServicesTests
             };
             this.context.Setup(x => x.Expenses).ReturnsDbSet(expenses);
 
-            var result = await this.service.GetExpensesHigherThan(number);
+            var result = await this.service.GetExpensesHigherThan(number, new PaginationFilter(1, 20), "/expenses/filter/" + number.ToString());
 
             Assert.NotNull(result);
-            Assert.All((IEnumerable<ExpenseDto>)result, expense => Assert.True(expense.Amount > number));
+            Assert.All((IEnumerable<ExpenseDto>)result.Data, expense => Assert.True(expense.Amount > number));
         }
     }
 }
