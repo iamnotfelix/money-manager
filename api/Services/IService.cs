@@ -1,10 +1,11 @@
 using Microsoft.AspNetCore.Mvc;
+using moneyManager.Pagination;
 
 namespace moneyManager.Services
 {
     public interface IService<T>
     {
-        Task<IEnumerable<T>> GetAllAsync();
+        Task<PagedResponse<IEnumerable<T>>> GetAllAsync(PaginationFilter paginationFilter, string route);
         Task<T> GetByIdAsync(Guid id);
         Task<T> AddAsync(T entity);
         Task UpdateAsync(Guid id, T entity);
