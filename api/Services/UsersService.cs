@@ -2,27 +2,39 @@ using moneyManager.Repositories;
 using moneyManager.Models;
 using moneyManager.Dtos;
 using moneyManager.Exceptions;
+using Microsoft.AspNetCore.Mvc;
+using moneyManager.Pagination;
+using Microsoft.EntityFrameworkCore;
 
 namespace moneyManager.Services
 {
     public class UsersService : IService<IUserDto>
     {
         private readonly DatabaseContext context;
+        private readonly IUriBuilder uriBuilder;
 
-        public UsersService(DatabaseContext context)
+        public UsersService(DatabaseContext context, IUriBuilder uriBuilder)
         {
             this.context = context;
+            this.uriBuilder = uriBuilder;
         }
 
-        public async Task<IEnumerable<IUserDto>> GetAllAsync()
+        public async Task<PagedResponse<IEnumerable<IUserDto>>> GetAllAsync(PaginationFilter filter, string route)
         {
-            var users = await Task.FromResult(this.context.Users.ToList<User>());
+            var users = await this.context.Users
+                .Skip((filter.PageNumber - 1) * filter.PageSize)
+                .Take(filter.PageSize)
+                .ToListAsync();
+
             if (users is null)
             {
                 throw new NotFoundException();
             }
 
-            return users.Select(user => user.AsDto());
+            var totalRecords = await this.context.Categories.CountAsync();
+            var usersDtos = users.Select(category => category.AsDto()).ToList();
+            
+            return PagedResponse<IUserDto>.CreatePagedReponse(usersDtos, filter, totalRecords, uriBuilder, route);
         }
 
         public async Task<IUserDto> GetByIdAsync(Guid id)

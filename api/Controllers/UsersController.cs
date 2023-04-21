@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using moneyManager.Dtos;
 using moneyManager.Exceptions;
+using moneyManager.Pagination;
 using moneyManager.Services;
 
 namespace moneyManager.Controllers
@@ -19,12 +20,13 @@ namespace moneyManager.Controllers
 
         // GET /users
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<UserDto>>> GetUsersAsync() 
+        public async Task<ActionResult<PagedResponse<IEnumerable<UserDto>>>> GetUsersAsync([FromQuery] PaginationFilter paginationFilter) 
         { 
             try
             {
-                var users = await this.service.GetAllAsync();
-                return Ok(users);
+                var users = await this.service.GetAllAsync(paginationFilter, Request.Path.Value!);
+                var castedUsers = new PagedResponse<IEnumerable<UserDto>>(users);
+                return Ok(castedUsers);
             }
             catch (NotFoundException e)
             {
