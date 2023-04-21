@@ -1,5 +1,6 @@
 using moneyManager.Dtos;
 using moneyManager.Models;
+using moneyManager.Pagination;
 using moneyManager.Repositories;
 using moneyManager.Services;
 using Moq;
@@ -12,11 +13,13 @@ namespace tests.ServicesTests
     {
         private readonly Mock<DatabaseContext> context;
         private readonly ExpensesService service;
+        private readonly IUriBuilder uriBuilder;
 
         public ExpensesServiceTests()
         {
             this.context = new Mock<DatabaseContext>();
-            this.service = new ExpensesService(this.context.Object);
+            this.uriBuilder = new moneyManager.Pagination.UriBuilder("http://localhost:5000");
+            this.service = new ExpensesService(this.context.Object, this.uriBuilder);
         }
 
         [Theory]
