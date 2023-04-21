@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using moneyManager.Dtos;
 using moneyManager.Services;
 using moneyManager.Exceptions;
+using moneyManager.Pagination;
 
 namespace moneyManager.Controllers
 {
@@ -19,12 +20,13 @@ namespace moneyManager.Controllers
 
         // GET /expenses
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<ExpenseDto>>> GetExpensesAsync() 
+        public async Task<ActionResult<PagedResponse<IEnumerable<ExpenseDto>>>> GetExpensesAsync([FromQuery] PaginationFilter paginationFilter) 
         {
             try
             {
-                var expenses = await this.service.GetAllAsync();
-                return Ok(expenses);
+                var expenses = await this.service.GetAllAsync(paginationFilter, Request.Path.Value!);
+                var castedExpenses = new PagedResponse<IEnumerable<ExpenseDto>>(expenses);
+                return Ok(castedExpenses);
             }
             catch (NotFoundException e)
             {
