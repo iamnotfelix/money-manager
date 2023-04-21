@@ -1,9 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
-using moneyManager.Repositories;
 using moneyManager.Models;
 using moneyManager.Dtos;
 using moneyManager.Services;
 using moneyManager.Exceptions;
+using moneyManager.Pagination;
 
 namespace moneyManager.Controllers
 {
@@ -13,19 +13,20 @@ namespace moneyManager.Controllers
     {
         private readonly CategoriesService service;
 
-        public CategoriesController(IService<ICategoyDto> service) 
+        public CategoriesController(IService<ICategoryDto> service) 
         {
             this.service = (CategoriesService) service;
         }
 
         // GET /categories
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Category>>> GetCategoriesAsync() 
+        public async Task<ActionResult<PagedResponse<IEnumerable<CategoryDto>>>> GetCategoriesAsync([FromQuery] PaginationFilter paginationFilter) 
         {
             try
             {
-                var categories = await this.service.GetAllAsync();
-                return Ok(categories);
+                var categories = await this.service.GetAllAsync(paginationFilter, Request.Path.Value!);
+                var castedCategories = new PagedResponse<IEnumerable<CategoryDto>>(categories);
+                return Ok(castedCategories);
             }
             catch (NotFoundException e)
             {

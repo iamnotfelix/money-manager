@@ -3,31 +3,40 @@ using moneyManager.Models;
 using moneyManager.Dtos;
 using moneyManager.Exceptions;
 using Microsoft.EntityFrameworkCore;
-
+using moneyManager.Pagination;
 
 namespace moneyManager.Services
 {
-    public class CategoriesService : IService<ICategoyDto>
+    public class CategoriesService : IService<ICategoryDto>
     {
         private readonly DatabaseContext context;
+        private readonly IUriBuilder uriBuilder;
 
-        public CategoriesService(DatabaseContext context)
+        public CategoriesService(DatabaseContext context, IUriBuilder uriBuilder)
         {
             this.context = context;
+            this.uriBuilder = uriBuilder;
         }
 
-        public async Task<IEnumerable<ICategoyDto>> GetAllAsync()
+        public async Task<PagedResponse<IEnumerable<ICategoryDto>>> GetAllAsync(PaginationFilter filter, string route)
         {
-            var categories = await Task.FromResult(this.context.Categories.ToList<Category>());
+            var categories = await this.context.Categories
+                .Skip((filter.PageNumber - 1) * filter.PageSize)
+                .Take(filter.PageSize)
+                .ToListAsync();
+
             if (categories is null)
             {
                 throw new NotFoundException("Categories not found");
             }
-            
-            return categories.Select(category => category.AsDto());
+
+            var totalRecords = await this.context.Categories.CountAsync();
+            var categoriesDtos = categories.Select(category => category.AsDto()).ToList();
+
+            return PagedResponse<ICategoryDto>.CreatePagedReponse(categoriesDtos, filter, totalRecords, uriBuilder, route);
         }
 
-        public async Task<ICategoyDto> GetByIdAsync(Guid id)
+        public async Task<ICategoryDto> GetByIdAsync(Guid id)
         {
             var category = await context.Categories.FindAsync(id);
             if (category is null)
@@ -53,7 +62,7 @@ namespace moneyManager.Services
             return category.AsGetByIdDto();
         }
 
-        public async Task<ICategoyDto> AddAsync(ICategoyDto entity)
+        public async Task<ICategoryDto> AddAsync(ICategoryDto entity)
         {
             var category = (CreateCategoryDto) entity;
             var user = await this.context.Users.FindAsync(category.UserId);
@@ -78,7 +87,7 @@ namespace moneyManager.Services
             return actualCategory.AsGetByIdDto();
         }
 
-        public async Task UpdateAsync(Guid id, ICategoyDto entity)
+        public async Task UpdateAsync(Guid id, ICategoryDto entity)
         {
             var category = (UpdateCategoryDto) entity;
             var existingCategory = await this.context.Categories.FindAsync(id);
@@ -115,7 +124,7 @@ namespace moneyManager.Services
             await this.context.SaveChangesAsync();
         }
 
-        public async Task<IEnumerable<ICategoyDto>> GetCategoriesOrderedByTotalExpenseAmountAsync()
+        public async Task<IEnumerable<ICategoryDto>> GetCategoriesOrderedByTotalExpenseAmountAsync()
         {
             var categories = await this.context.Categories
                 .Include(c => c.ExpenseCategories)
@@ -151,7 +160,7 @@ namespace moneyManager.Services
             return categoryTotalDtos;
         }
 
-        public async Task<ICategoyDto> GetCategoryWithMinTotalExpenseAmountAsync()
+        public async Task<ICategoryDto> GetCategoryWithMinTotalExpenseAmountAsync()
         {
             var categories = await Task.FromResult(this.context.Categories.ToList<Category>());
             if (categories is null)
@@ -199,7 +208,7 @@ namespace moneyManager.Services
             return minimumCategory;
         }
 
-        public async Task<ICategoyDto> GetCategoryWithMaxTotalExpenseAmountAsync()
+        public async Task<ICategoryDto> GetCategoryWithMaxTotalExpenseAmountAsync()
         {
             var categories = await Task.FromResult(this.context.Categories.ToList<Category>());
             if (categories is null)
