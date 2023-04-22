@@ -1,4 +1,5 @@
 using moneyManager.Dtos;
+using moneyManager.Filters;
 using moneyManager.Models;
 using moneyManager.Pagination;
 using moneyManager.Repositories;
@@ -73,10 +74,11 @@ namespace tests.ServicesTests
             var categories = new List<Category> { category1, category2, category3 };
             this.context.Setup(x => x.Categories).ReturnsDbSet(categories);
 
-            var result = (IEnumerable<CategoryTotalDto>) await this.service.GetCategoriesOrderedByTotalExpenseAmountAsync();
+            var result = await this.service.GetCategoriesOrderedByTotalExpenseAmountAsync(new PaginationFilter(1, 20), "/categories/ordered/");
+            var castedResult = new PagedResponse<IEnumerable<CategoryTotalDto>>(result);
 
-            Assert.NotNull(result);
-            var res = result.ToList();
+            Assert.NotNull(castedResult.Data);
+            var res = castedResult.Data.ToList();
             for (int i = 1; i < res.Count(); ++i) 
             {
                 Assert.True(res[i].Total > res[i - 1].Total);
