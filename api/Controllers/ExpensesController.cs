@@ -18,7 +18,7 @@ namespace moneyManager.Controllers
         }
 
 
-        // GET /expenses
+        // GET /expenses?pageNumber=:pageNumber&pageSize=:pageSize
         [HttpGet]
         public async Task<ActionResult<PagedResponse<IEnumerable<ExpenseDto>>>> GetExpensesAsync([FromQuery] PaginationFilter paginationFilter) 
         {
