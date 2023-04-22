@@ -178,30 +178,21 @@ namespace moneyManager.Services
 
         public async Task<ICategoryDto> GetCategoryWithMinTotalExpenseAmountAsync()
         {
-            var categories = await Task.FromResult(this.context.Categories.ToList<Category>());
+            var categories = await this.context.Categories
+                .Include(c => c.ExpenseCategories)
+                .ThenInclude(ec => ec.Expense)
+                .ToListAsync();
+
             if (categories is null)
             {
                 throw new NotFoundException("Category not found.");
             }
 
             CategoryTotalDto? minimumCategory = null;
-            int minimumTotal = Int32.MaxValue;
+            long minimumTotal = Int64.MaxValue;
             foreach (var category in categories)
             {
-                await this.context.Entry(category)
-                    .Collection(c => c.ExpenseCategories)
-                    .LoadAsync();
-
-                int total = 0;
-                foreach (var expenseCategory in category.ExpenseCategories)
-                {
-                    await this.context.Entry(expenseCategory)
-                        .Reference(ec => ec.Expense)
-                            .LoadAsync();
-                    
-                    total += expenseCategory.Expense!.Amount;
-                }
-                
+                long total = category.ExpenseCategories.Sum(ec => ec.Expense!.Amount);
                 if (minimumTotal > total && total > 0)
                 {
                     minimumTotal = total;
@@ -226,30 +217,21 @@ namespace moneyManager.Services
 
         public async Task<ICategoryDto> GetCategoryWithMaxTotalExpenseAmountAsync()
         {
-            var categories = await Task.FromResult(this.context.Categories.ToList<Category>());
+            var categories = await this.context.Categories
+                .Include(c => c.ExpenseCategories)
+                .ThenInclude(ec => ec.Expense)
+                .ToListAsync();
+
             if (categories is null)
             {
                 throw new NotFoundException("Category not found.");
             }
 
             CategoryTotalDto? maximumCategory = null;
-            int maximumTotal = Int32.MinValue;
+            long maximumTotal = Int64.MinValue;
             foreach (var category in categories)
             {
-                await this.context.Entry(category)
-                    .Collection(c => c.ExpenseCategories)
-                    .LoadAsync();
-
-                int total = 0;
-                foreach (var expenseCategory in category.ExpenseCategories)
-                {
-                    await this.context.Entry(expenseCategory)
-                        .Reference(ec => ec.Expense)
-                            .LoadAsync();
-                    
-                    total += expenseCategory.Expense!.Amount;
-                }
-                
+                long total = category.ExpenseCategories.Sum(ec => ec.Expense!.Amount);
                 if (maximumTotal < total && total > 0)
                 {
                     maximumTotal = total;
