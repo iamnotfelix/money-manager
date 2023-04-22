@@ -1,28 +1,16 @@
-import { Box, Button, FormGroup, MenuItem, Stack, TextField, Typography } from "@mui/material"
-import * as React from 'react';
-import { useState } from "react"
+import { Box, Button, FormGroup, TextField } from "@mui/material"
+import { useEffect, useState } from "react"
 import { User } from "../../Models/User";
 import { useNavigate } from "react-router-dom";
+import { debounce } from "lodash";
+import { AutoComplete } from "../../Components/Inputs/AutoComplete";
 
 export const CategoryAdd = () => {
     const [name, setName] = useState("");
     const [description, setDescription] = useState("");
-    const [userId, setUserId] = useState("");
+    const [user, setUser] = useState<User | null>();
 
-    const [loading, setLoading] = React.useState(false);
     const [users, setUsers] = useState([]);
-
-    React.useEffect(() => {
-        setLoading(true);
-        const fetchData = async () => {
-            const data = await fetch(import.meta.env.VITE_REACT_API_BACKEND + `/users`);
-            const users = await data.json();
-            setUsers(users);
-        }
-
-        fetchData();
-        setLoading(false);
-    }, [])
 
     const navigate = useNavigate();
 
@@ -60,7 +48,7 @@ export const CategoryAdd = () => {
             setDescriptionText("Description cannot be empty.");
             valid = false;
         }
-        if (userId.length == 0) {
+        if (user == null) {
             setUserError(true);
             setUserText("You must select a user.")
             valid = false;
@@ -68,6 +56,31 @@ export const CategoryAdd = () => {
 
         return valid;
     }
+
+    const fetchUsers = async (text: string, number: number) => {
+        const data = await fetch(import.meta.env.VITE_REACT_API_BACKEND + `/users/search?text=${text}&number=${number}`);
+        const res = await data.json();
+        setUsers(res);
+    }
+
+    const debouncedFetchUsers = debounce(async (text: string, number: number) => {
+        await fetchUsers(text, number);
+    }, 500);
+    
+
+	useEffect(() => {
+		return () => {
+			debouncedFetchUsers.cancel();
+		};
+	}, [debouncedFetchUsers]);
+
+    const handleUserInputChange = (event: any, value: string, reason: any) => {
+		if (reason === "input" && value.length > 0) {
+			debouncedFetchUsers(value, 10);
+		} else if (reason === "input") {
+            setUsers([]);
+        }
+	};
 
     const handleSubmit = async () => {
         const valid = validate();
@@ -79,7 +92,7 @@ export const CategoryAdd = () => {
         const body = {
             name: name,
             description: description,
-            userId: userId
+            userId: user!.id
         }
 
         const response = await window.fetch(import.meta.env.VITE_REACT_API_BACKEND + `/categories`, {
@@ -96,8 +109,6 @@ export const CategoryAdd = () => {
 
     return (
         <Box>
-            {loading && <Stack alignItems="center" mt={4}><Typography variant="h3" gutterBottom>Still loading...</Typography></Stack>}
-            {!loading &&
             <FormGroup sx={{ display: "flex", alignItems: "center"}}>
                 <TextField
                     type="text"
@@ -132,12 +143,27 @@ export const CategoryAdd = () => {
                     fullWidth
                     sx={{m: 2, width: "50ch"}}
                 />
-                <TextField
+                <AutoComplete
+                    options={users}
+                    getOptionLabel={(option: User) => option.username}
+                    label="User"
+                    error={userError}
+                    helperText={userText}
+                    onInputChange={handleUserInputChange}
+                    onChange={(e: any, value: any) => {
+                        setUser(value);
+                        setUserError(false);
+                        setUserText("");
+                    }}
+                    filterOptions={(x: any) => x}
+                    sx={{m: 2, width: "25ch"}}
+                />
+                {/* <TextField
                     select
                     label="User"
                     required
                     onChange={e => {
-                        setUserId(e.target.value);
+                        setUser(e.target.value);
                         setUserError(false);
                         setUserText("");
                     }}
@@ -150,9 +176,9 @@ export const CategoryAdd = () => {
                         {option.username}
                         </MenuItem>
                     ))}
-                </TextField>
+                </TextField> */}
                 <Button variant="outlined" color="primary" type="submit" sx={{m: 4, width: "25ch"}} onClick={handleSubmit}>Add</Button>
-            </FormGroup>}
+            </FormGroup>
         </Box>
     );
 }

@@ -1,6 +1,5 @@
-import { Box, Button, Checkbox, FormControlLabel, FormGroup, MenuItem, Stack, TextField, Typography } from "@mui/material"
-import * as React from 'react';
-import { useState } from "react"
+import { Box, Button, FormGroup, MenuItem, TextField } from "@mui/material"
+import { useEffect, useState } from "react"
 import { DateField } from '@mui/x-date-pickers/DateField';
 import dayjs, { Dayjs } from "dayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers";
@@ -8,6 +7,8 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { User } from "../../Models/User";
 import { useNavigate } from "react-router-dom";
 import { Category } from "../../Models/Category";
+import { debounce } from "lodash"
+import { AutoComplete } from "../../Components/Inputs/AutoComplete"
 
 export const ExpenseAdd = () => {
     const [amount, setAmount] = useState(0);
@@ -15,39 +16,14 @@ export const ExpenseAdd = () => {
     const [description, setDescription] = useState("");
     const [currency, setCurrency] = useState("Lei");
     const [date, setDate] = useState<Dayjs | null>(dayjs('2023-01-1'));
-    const [userId, setUserId] = useState("");
+    const [user, setUser] = useState<User | null>(null);
+    const [categories, setCategories] = useState<Category []>([]);
 
-    const [loading, setLoading] = React.useState(false);
-    const [users, setUsers] = useState([]);
-    const [categories, setAllCategories] = React.useState([]);
-    const [checkedCategories, setChecked] = React.useState<Boolean[]>([]);
+    const [users, setUsers] = useState<User []>([]);
+    const [allCategories, setAllCategories] = useState<Category []>([]);
 
     const currencies = [ { value: 'Lei', label: 'Lei' }, { value: 'Euro', label: 'Euro' } ];
     const paymentTypes = [ { value:"Cash", label:"Cash" }, { value:"BT", label:"BT" }, { value:"Revolut", label:"Revolut" }, { value:"Alpha", label:"Alpha" } ];
-
-
-    React.useEffect(() => {
-        setLoading(true);
-        const fetchData = async () => {
-            const data = await fetch(import.meta.env.VITE_REACT_API_BACKEND + `/users`);
-            const users = await data.json();
-            setUsers(users);
-        }
-
-        const fetchCategories = async () => {
-            const data = await fetch(import.meta.env.VITE_REACT_API_BACKEND + `/categories`);
-            const res = await data.json();
-            setAllCategories(res);
-
-            const tmp = new Array(res.length).fill(false);
-            setChecked(tmp);
-        }
-
-        fetchData();
-        fetchCategories();
-
-        setLoading(false);
-    }, [])
 
     const navigate = useNavigate();
 
@@ -89,18 +65,59 @@ export const ExpenseAdd = () => {
             setDescriptionText("Description cannot be empty.");
             valid = false;
         }
-        // if (!date || date < dayjs('2000-01-1') || date > dayjs('2100-01-1')) {
-        //     setDateError(true);
-        //     setDateText("Date must be between 01-01-2000 and 01-01-2100.");
-        //     valid = false;
-        // }
-        if (userId.length == 0) {
+        if (user == null) {
             setUserError(true);
             setUserText("You must select a user.")
             valid = false;
         }
 
         return valid;
+    }
+
+    const fetchCategories = async (text: string, number: number) => {
+        const data = await fetch(import.meta.env.VITE_REACT_API_BACKEND + `/categories/search?text=${text}&number=${number}`);
+        const res = await data.json();
+        setAllCategories(res);
+    }
+
+    const fetchUsers = async (text: string, number: number) => {
+        const data = await fetch(import.meta.env.VITE_REACT_API_BACKEND + `/users/search?text=${text}&number=${number}`);
+        const res = await data.json();
+        setUsers(res);
+    }
+
+    const debouncedFetchUsers = debounce(async (text: string, number: number) => {
+        await fetchUsers(text, number);
+    }, 500);
+    
+    const debouncedFetchCategories = debounce(async (text: string, number: number) => {
+        await fetchCategories(text, number);
+    }, 500);
+
+	useEffect(() => {
+		return () => {
+			debouncedFetchUsers.cancel();
+		};
+	}, [debouncedFetchUsers]);
+
+    useEffect(() => {
+		return () => {
+			debouncedFetchCategories.cancel();
+		};
+	}, [debouncedFetchCategories]);
+
+    const handleUserInputChange = (event: any, value: string, reason: any) => {
+		if (reason === "input" && value.length > 0) {
+			debouncedFetchUsers(value, 10);
+		} else if (reason === "input") {
+            setUsers([]);
+        }
+	};
+
+    const handleCategoryInputChange = (event: any, value: string, reason: any) => {
+        if (reason === "input" && value.length > 0) {
+			debouncedFetchCategories(value, 10);
+		} 
     }
 
     const handleSubmit = async () => {
@@ -115,11 +132,9 @@ export const ExpenseAdd = () => {
             paymentType: paymentType,
             description: description,
             currency: currency,
-            userId: userId,
+            userId: user!.id,
             date: date,
-            expenseCategories: categories.filter((_, index) => {
-                return checkedCategories[index]
-            }).map((category: Category) => {
+            expenseCategories: categories.map((category: Category) => {
                 return {
                     categoryId: category.id
                 };
@@ -138,15 +153,8 @@ export const ExpenseAdd = () => {
         navigate("/expenses");
     }
 
-    const handleCheckBoxChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        checkedCategories[parseInt(event.target.name)] = event.target.checked;
-        setChecked(checkedCategories);
-    };
-
     return (
         <Box>
-            {loading && <Stack alignItems="center" mt={4}><Typography variant="h3" gutterBottom>Still loading...</Typography></Stack>}
-            {!loading &&
             <FormGroup sx={{ display: "flex", alignItems: "center"}}>
                 <TextField
                     variant='outlined'
@@ -231,32 +239,37 @@ export const ExpenseAdd = () => {
                         sx={{m: 2, width: "25ch"}}
                         />
                 </LocalizationProvider>
-                <TextField
-                    select
+                <AutoComplete
+                    options={users}
+                    getOptionLabel={(option: User) => option.username}
                     label="User"
-                    required
-                    onChange={e => {
-                        setUserId(e.target.value);
+                    error={userError}
+                    helperText={userText}
+                    onInputChange={handleUserInputChange}
+                    onChange={(e: any, value: any) => {
+                        setUser(value);
                         setUserError(false);
                         setUserText("");
                     }}
-                    error={userError}
-                    helperText={userText}
+                    filterOptions={(x: any) => x}
                     sx={{m: 2, width: "25ch"}}
-                >
-                    {users.map((option: User) => (
-                        <MenuItem key={option.id} value={option.id}>
-                        {option.username}
-                        </MenuItem>
-                    ))}
-                </TextField>
-                <FormGroup>
-                    {categories?.map((category: Category, index) => (
-                        <FormControlLabel key={index} control={<Checkbox onChange={handleCheckBoxChange} name={index.toString()}/>} label={category.name} />
-                    ))}
-                </FormGroup>
+                />
+                <AutoComplete
+                    multiple
+                    options={allCategories}
+                    getOptionLabel={(option: Category) => option.name}
+                    label="Categories"
+                    error={false}
+                    helperText=""
+                    onInputChange={handleCategoryInputChange}
+                    onChange={(e: any, value: any) => {
+                        setCategories(value);
+                    }}
+                    filterOptions={(x: any) => x}
+                    sx={{m: 2, width: "25ch"}}
+                />
                 <Button variant="outlined" color="primary" type="submit" sx={{m: 4, width: "25ch"}} onClick={handleSubmit}>Add</Button>
-            </FormGroup>}
+            </FormGroup>
         </Box>
     );
 }

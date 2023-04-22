@@ -1,6 +1,5 @@
-import { Box, Button, Checkbox, FormControl, FormControlLabel, FormGroup, InputLabel, MenuItem, Select, Stack, TextField, Typography } from "@mui/material"
-import * as React from 'react';
-import { useState } from "react"
+import { Box, Button, FormGroup, MenuItem, Stack, TextField, Typography } from "@mui/material"
+import { useEffect, useState } from "react"
 import { DateField } from '@mui/x-date-pickers/DateField';
 import dayjs, { Dayjs } from "dayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers";
@@ -8,6 +7,8 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { useNavigate, useParams } from "react-router-dom";
 import { Category } from "../../Models/Category";
 import { Expense } from "../../Models/Expense";
+import { AutoComplete } from "../../Components/Inputs/AutoComplete";
+import { debounce } from "lodash";
 
 export const ExpenseUpdate = () => {
     const params = useParams();
@@ -17,16 +18,16 @@ export const ExpenseUpdate = () => {
     const [description, setDescription] = useState("");
     const [currency, setCurrency] = useState("");
     const [date, setDate] = useState<Dayjs | null>(dayjs('2023-01-1'));
+    const [categories, setCategories] = useState<Category []>([]);
 
-    const [loading, setLoading] = React.useState(false);
-    const [categories, setAllCategories] = React.useState([]);
-    const [checkedCategories, setChecked] = React.useState<Boolean[]>([]);
+    const [loading, setLoading] = useState(false);
+    const [allCategories, setAllCategories] = useState([]);
 
     const currencies = [ { value: 'Lei', label: 'Lei' }, { value: 'Euro', label: 'Euro' } ];
     const paymentTypes = [ { value:"Cash", label:"Cash" }, { value:"BT", label:"BT" }, { value:"Revolut", label:"Revolut" }, { value:"Alpha", label:"Alpha" } ];
 
 
-    React.useEffect(() => {
+    useEffect(() => {
         setLoading(true);
 
         const fetchExpense = async () => {
@@ -39,19 +40,7 @@ export const ExpenseUpdate = () => {
             setDescription(expense.description);
             setDate(dayjs(expense.date));
         }
-
-        const fetchCategories = async () => {
-            const data = await fetch(import.meta.env.VITE_REACT_API_BACKEND + `/categories`);
-            const res = await data.json();
-            setAllCategories(res);
-
-            const tmp = new Array(res.length).fill(false);
-            setChecked(tmp);
-        }
-
         fetchExpense();
-        fetchCategories();
-
         setLoading(false);
     }, [params.id])
 
@@ -95,6 +84,29 @@ export const ExpenseUpdate = () => {
         return valid;
     }
 
+    const fetchCategories = async (text: string, number: number) => {
+        const data = await fetch(import.meta.env.VITE_REACT_API_BACKEND + `/categories/search?text=${text}&number=${number}`);
+        const res = await data.json();
+        setAllCategories(res);
+    }
+
+    const debouncedFetchCategories = debounce(async (text: string, number: number) => {
+        await fetchCategories(text, number);
+    }, 500);
+
+    useEffect(() => {
+		return () => {
+			debouncedFetchCategories.cancel();
+		};
+	}, [debouncedFetchCategories]);
+
+
+    const handleCategoryInputChange = (event: any, value: string, reason: any) => {
+        if (reason === "input" && value.length > 0) {
+			debouncedFetchCategories(value, 10);
+		} 
+    }
+
     const handleSubmit = async () => {
         const valid = validate();
 
@@ -108,9 +120,7 @@ export const ExpenseUpdate = () => {
             description: description,
             currency: currency,
             date: date,
-            expenseCategories: categories.filter((_, index) => {
-                return checkedCategories[index]
-            }).map((category: Category) => {
+            expenseCategories: categories.map((category: Category) => {
                 return {
                     categoryId: category.id
                 };
@@ -127,12 +137,6 @@ export const ExpenseUpdate = () => {
 
         navigate(`/expenses/${params.id}`);
     }
-
-    const handleCheckBoxChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        checkedCategories[parseInt(event.target.name)] = event.target.checked;
-        setChecked(checkedCategories);
-    };
-    
 
     return (
         <Box>
@@ -221,11 +225,20 @@ export const ExpenseUpdate = () => {
                         sx={{m: 2, width: "25ch"}}
                         />
                 </LocalizationProvider>
-                <FormGroup>
-                    {categories?.map((category: Category, index) => (
-                        <FormControlLabel key={index} control={<Checkbox onChange={handleCheckBoxChange} name={index.toString()}/>} label={category.name} />
-                    ))}
-                </FormGroup>
+                <AutoComplete
+                    multiple
+                    options={allCategories}
+                    getOptionLabel={(option: Category) => option.name}
+                    label="Categories"
+                    error={false}
+                    helperText=""
+                    onInputChange={handleCategoryInputChange}
+                    onChange={(e: any, value: any) => {
+                        setCategories(value);
+                    }}
+                    filterOptions={(x: any) => x}
+                    sx={{m: 2, width: "25ch"}}
+                />
                 <Button variant="outlined" color="primary" type="submit" sx={{m: 4, width: "25ch"}} onClick={handleSubmit}>Update</Button>
             </FormGroup>}
         </Box>
