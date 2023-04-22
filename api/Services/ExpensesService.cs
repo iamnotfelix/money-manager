@@ -4,6 +4,7 @@ using moneyManager.Dtos;
 using moneyManager.Exceptions;
 using moneyManager.Pagination;
 using Microsoft.EntityFrameworkCore;
+using moneyManager.Filters;
 
 namespace moneyManager.Services
 {

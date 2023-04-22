@@ -3,6 +3,7 @@ using moneyManager.Dtos;
 using moneyManager.Services;
 using moneyManager.Exceptions;
 using moneyManager.Pagination;
+using moneyManager.Filters;
 
 namespace moneyManager.Controllers
 {

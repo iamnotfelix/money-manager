@@ -1,4 +1,5 @@
 using moneyManager.Dtos;
+using moneyManager.Filters;
 
 namespace moneyManager.Pagination
 {

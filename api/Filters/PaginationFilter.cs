@@ -1,4 +1,4 @@
-namespace moneyManager.Pagination
+namespace moneyManager.Filters
 {
     public class PaginationFilter
     {

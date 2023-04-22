@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.WebUtilities;
+using moneyManager.Filters;
 
 namespace moneyManager.Pagination
 {
