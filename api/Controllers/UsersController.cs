@@ -21,11 +21,11 @@ namespace moneyManager.Controllers
 
         // GET /users?pageNumber=:pageNumber&pageSize=:pageSize
         [HttpGet]
-        public async Task<ActionResult<PagedResponse<IEnumerable<UserDto>>>> GetUsersAsync([FromQuery] PaginationFilter paginationFilter) 
+        public async Task<ActionResult<PagedResponse<IEnumerable<UserDto>>>> GetUsersAsync([FromQuery] PaginationFilter filter) 
         { 
             try
             {
-                var users = await this.service.GetAllAsync(paginationFilter, Request.Path.Value!);
+                var users = await this.service.GetAllAsync(filter, Request.Path.Value!);
                 var castedUsers = new PagedResponse<IEnumerable<UserDto>>(users);
                 return Ok(castedUsers);
             }
@@ -59,6 +59,22 @@ namespace moneyManager.Controllers
             {
                 var users = await this.service.SearchUserAsync(filter);
                 return Ok(users);
+            }
+            catch (NotFoundException e)
+            {
+                return NotFound(e.Message);
+            }
+        }
+        
+        // GET /users/total?pageNumber=:pageNumber&pageSize=:pageSize
+        [HttpGet("total")]
+        public async Task<ActionResult<PagedResponse<IEnumerable<UserTotalDto>>>> GetUsersTotalAsync([FromQuery] PaginationFilter filter)
+        {
+            try
+            {
+                var users = await this.service.GetUsersTotalAsync(filter, Request.Path.Value!);
+                var castedUsers = new PagedResponse<IEnumerable<UserTotalDto>>(users);
+                return Ok(castedUsers);
             }
             catch (NotFoundException e)
             {

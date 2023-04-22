@@ -33,7 +33,7 @@ namespace moneyManager.Services
             }
 
             var totalRecords = await this.context.Categories.CountAsync();
-            var usersDtos = users.Select(category => category.AsDto()).ToList();
+            var usersDtos = users.Select(category => category.AsDto());
             
             return PagedResponse<IUserDto>.CreatePagedReponse(usersDtos, filter, totalRecords, uriBuilder, route);
         }
@@ -70,6 +70,25 @@ namespace moneyManager.Services
             }
 
             return users.Select(user => user.AsDto());
+        }
+
+        public async Task<PagedResponse<IEnumerable<IUserDto>>> GetUsersTotalAsync(PaginationFilter filter, string route)
+        {
+            var users = await this.context.Users
+                .Include(u => u.Expenses)
+                .Skip((filter.PageNumber - 1) * filter.PageSize)
+                .Take(filter.PageSize)
+                .ToListAsync();
+
+            if (users is null)
+            {
+                throw new NotFoundException("Users not found.");
+            }
+
+            var totalRecords = await this.context.Categories.CountAsync();
+            var usersDtos = users.Select(category => category.AsTotalDto());
+            
+            return PagedResponse<IUserDto>.CreatePagedReponse(usersDtos, filter, totalRecords, uriBuilder, route);
         }
 
         public async Task<IUserDto> AddAsync(IUserDto entity)
