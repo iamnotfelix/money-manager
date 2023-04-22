@@ -4,6 +4,7 @@ using moneyManager.Dtos;
 using moneyManager.Services;
 using moneyManager.Exceptions;
 using moneyManager.Pagination;
+using moneyManager.Filters;
 
 namespace moneyManager.Controllers
 {
@@ -18,7 +19,7 @@ namespace moneyManager.Controllers
             this.service = (CategoriesService) service;
         }
 
-        // GET /categories
+        // GET /categories?pageNumber=:pageNumber&pageSize=:pageSize
         [HttpGet]
         public async Task<ActionResult<PagedResponse<IEnumerable<CategoryDto>>>> GetCategoriesAsync([FromQuery] PaginationFilter paginationFilter) 
         {
@@ -43,6 +44,21 @@ namespace moneyManager.Controllers
             {
                 var category = await this.service.GetByIdAsync(id);
                 return Ok(category);
+            }
+            catch (NotFoundException e)
+            {
+                return NotFound(e.Message);
+            }
+        }
+
+        // GET /categories/search?text=:text&number=:number
+        [HttpGet("search")]
+        public async Task<ActionResult<IEnumerable<CategoryDto>>> SearchUserAsync([FromQuery] SearchFilter filter)
+        {
+            try
+            {
+                var users = await this.service.SearchCategoryAsync(filter);
+                return Ok(users);
             }
             catch (NotFoundException e)
             {

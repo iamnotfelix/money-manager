@@ -4,6 +4,7 @@ using moneyManager.Dtos;
 using moneyManager.Exceptions;
 using Microsoft.EntityFrameworkCore;
 using moneyManager.Pagination;
+using moneyManager.Filters;
 
 namespace moneyManager.Services
 {
@@ -60,6 +61,21 @@ namespace moneyManager.Services
             }
 
             return category.AsGetByIdDto();
+        }
+
+        public async Task<IEnumerable<CategoryDto>> SearchCategoryAsync(SearchFilter filter)
+        {
+            var categories = await this.context.Categories
+                .Where(u => u.Name!.StartsWith(filter.Text, StringComparison.OrdinalIgnoreCase))
+                .Take(filter.Number)
+                .ToListAsync();
+
+            if (categories is null)
+            {
+                throw new NotFoundException("Categories not found.");
+            }
+
+            return categories.Select(category => category.AsDto());
         }
 
         public async Task<ICategoryDto> AddAsync(ICategoryDto entity)
