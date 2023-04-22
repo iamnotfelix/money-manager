@@ -21,11 +21,11 @@ namespace moneyManager.Controllers
 
         // GET /categories?pageNumber=:pageNumber&pageSize=:pageSize
         [HttpGet]
-        public async Task<ActionResult<PagedResponse<IEnumerable<CategoryDto>>>> GetCategoriesAsync([FromQuery] PaginationFilter paginationFilter) 
+        public async Task<ActionResult<PagedResponse<IEnumerable<CategoryDto>>>> GetCategoriesAsync([FromQuery] PaginationFilter filter) 
         {
             try
             {
-                var categories = await this.service.GetAllAsync(paginationFilter, Request.Path.Value!);
+                var categories = await this.service.GetAllAsync(filter, Request.Path.Value!);
                 var castedCategories = new PagedResponse<IEnumerable<CategoryDto>>(categories);
                 return Ok(castedCategories);
             }
@@ -66,14 +66,32 @@ namespace moneyManager.Controllers
             }
         }
 
+        // GET /categories/total?pageNumber=:pageNumber&pageSize=:pageSize
+        [HttpGet("total")]
+        public async Task<ActionResult<PagedResponse<IEnumerable<CategoryTotalDto>>>> GetCategoriesTotalAsync([FromQuery] PaginationFilter filter) 
+        {
+            try
+            {
+                var categories = await this.service.GetCategoriesTotalAsync(filter, Request.Path.Value!);
+                var castedCategories = new PagedResponse<IEnumerable<CategoryTotalDto>>(categories);
+                return Ok(castedCategories);
+            }
+            catch (NotFoundException e)
+            {
+                return NotFound(e.Message);
+            }
+        }
+
+
         // GET /categories/ordered
         [HttpGet("ordered")]
-        public async Task<ActionResult<IEnumerable<Category>>> GetCategoriesOrderedByTotalExpenseAmountAsync() 
+        public async Task<ActionResult<PagedResponse<IEnumerable<CategoryTotalDto>>>> GetCategoriesOrderedByTotalExpenseAmountAsync([FromQuery] PaginationFilter filter) 
         { 
             try
             {
-                var categories = await this.service.GetCategoriesOrderedByTotalExpenseAmountAsync();
-                return Ok(categories);
+                var categories = await this.service.GetCategoriesOrderedByTotalExpenseAmountAsync(filter, Request.Path.Value!);
+                var castedCategories = new PagedResponse<IEnumerable<CategoryTotalDto>>(categories);
+                return Ok(castedCategories);
             }
             catch (NotFoundException e)
             {

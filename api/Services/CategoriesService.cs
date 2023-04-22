@@ -32,7 +32,7 @@ namespace moneyManager.Services
             }
 
             var totalRecords = await this.context.Categories.CountAsync();
-            var categoriesDtos = categories.Select(category => category.AsDto()).ToList();
+            var categoriesDtos = categories.Select(category => category.AsDto());
 
             return PagedResponse<ICategoryDto>.CreatePagedReponse(categoriesDtos, filter, totalRecords, uriBuilder, route);
         }
@@ -78,69 +78,27 @@ namespace moneyManager.Services
             return categories.Select(category => category.AsDto());
         }
 
-        public async Task<ICategoryDto> AddAsync(ICategoryDto entity)
+        public async Task<PagedResponse<IEnumerable<ICategoryDto>>> GetCategoriesTotalAsync(PaginationFilter filter, string route)
         {
-            var category = (CreateCategoryDto) entity;
-            var user = await this.context.Users.FindAsync(category.UserId);
-            if (user is null)
+            var categories = await this.context.Categories
+                .Include(c => c.ExpenseCategories)
+                .ThenInclude(ec => ec.Expense)
+                .Skip((filter.PageNumber - 1) * filter.PageSize)
+                .Take(filter.PageSize)
+                .ToListAsync();
+
+            if (categories is null)
             {
-                throw new NotFoundException("User not found.");
+                throw new NotFoundException("Categories not found");
             }
 
-            var actualCategory = new Category() {
-                Id = Guid.NewGuid(),
-                Name = category.Name,
-                Description = category.Description,
-                DateCreated = DateTime.Now,
-                UserId = category.UserId
-            };
+            var totalRecords = await this.context.Categories.CountAsync();
+            var categoriesDtos = categories.Select(category => category.AsTotalDto());
 
-            actualCategory.Validate();
-
-            this.context.Categories.Add(actualCategory);
-            await this.context.SaveChangesAsync();
-
-            return actualCategory.AsGetByIdDto();
+            return PagedResponse<ICategoryDto>.CreatePagedReponse(categoriesDtos, filter, totalRecords, uriBuilder, route);
         }
 
-        public async Task UpdateAsync(Guid id, ICategoryDto entity)
-        {
-            var category = (UpdateCategoryDto) entity;
-            var existingCategory = await this.context.Categories.FindAsync(id);
-            if (existingCategory is null)
-            {
-                throw new NotFoundException("Category not found.");
-            }
-
-            var validationCategory = new Category {
-                Name = category.Name,
-                Description = category.Description
-            };
-
-            validationCategory.Validate();
-
-            existingCategory.Name = category.Name is null ?
-                existingCategory.Name : category.Name;
-            existingCategory.Description = category.Description is null ?
-                existingCategory.Description : category.Description;
-
-            await this.context.SaveChangesAsync();
-            // NOTE:  might have concurency problems
-        }
-        
-        public async Task DeleteAsync(Guid id)
-        {
-            var exisitingCategory = await this.context.Categories.FindAsync(id);
-            if (exisitingCategory == null)
-            {
-                throw new NotFoundException("Category not found.");
-            }
-            
-            this.context.Categories.Remove(exisitingCategory); 
-            await this.context.SaveChangesAsync();
-        }
-
-        public async Task<IEnumerable<ICategoryDto>> GetCategoriesOrderedByTotalExpenseAmountAsync()
+        public async Task<PagedResponse<IEnumerable<ICategoryDto>>> GetCategoriesOrderedByTotalExpenseAmountAsync(PaginationFilter filter, string route)
         {
             var categories = await this.context.Categories
                 .Include(c => c.ExpenseCategories)
@@ -152,28 +110,14 @@ namespace moneyManager.Services
                 throw new NotFoundException("Category not found.");
             }
 
-            var categoryTotalDtos = new List<CategoryTotalDto>();
-            foreach (var category in categories)
-            {
-                int total = 0;
-                foreach (var expenseCategory in category.ExpenseCategories)
-                {
-                    total += expenseCategory.Expense!.Amount;
-                }
-
-                categoryTotalDtos.Add(
-                    new CategoryTotalDto
-                    {
-                        Id = category.Id,
-                        Name = category.Name,
-                        Description = category.Description,
-                        Total = total,
-                        UserId = category.UserId
-                    });
-            }
-            categoryTotalDtos = categoryTotalDtos.OrderBy(c => c.Total).ToList();
+            var totalRecords = await this.context.Categories.CountAsync();
+            var categoriesDtos = categories
+                .Select(c => c.AsTotalDto())
+                .OrderBy(c => c.Total)
+                .Skip((filter.PageNumber - 1) * filter.PageSize)
+                .Take(filter.PageSize);
             
-            return categoryTotalDtos;
+            return PagedResponse<ICategoryDto>.CreatePagedReponse(categoriesDtos, filter, totalRecords, uriBuilder, route);
         }
 
         public async Task<ICategoryDto> GetCategoryWithMinTotalExpenseAmountAsync()
@@ -252,6 +196,68 @@ namespace moneyManager.Services
             }
 
             return maximumCategory;
+        }
+
+        public async Task<ICategoryDto> AddAsync(ICategoryDto entity)
+        {
+            var category = (CreateCategoryDto) entity;
+            var user = await this.context.Users.FindAsync(category.UserId);
+            if (user is null)
+            {
+                throw new NotFoundException("User not found.");
+            }
+
+            var actualCategory = new Category() {
+                Id = Guid.NewGuid(),
+                Name = category.Name,
+                Description = category.Description,
+                DateCreated = DateTime.Now,
+                UserId = category.UserId
+            };
+
+            actualCategory.Validate();
+
+            this.context.Categories.Add(actualCategory);
+            await this.context.SaveChangesAsync();
+
+            return actualCategory.AsGetByIdDto();
+        }
+
+        public async Task UpdateAsync(Guid id, ICategoryDto entity)
+        {
+            var category = (UpdateCategoryDto) entity;
+            var existingCategory = await this.context.Categories.FindAsync(id);
+            if (existingCategory is null)
+            {
+                throw new NotFoundException("Category not found.");
+            }
+
+            var validationCategory = new Category {
+                Name = category.Name,
+                Description = category.Description
+            };
+
+            validationCategory.Validate();
+
+            existingCategory.Name = category.Name is null ?
+                existingCategory.Name : category.Name;
+            existingCategory.Description = category.Description is null ?
+                existingCategory.Description : category.Description;
+
+            await this.context.SaveChangesAsync();
+            // NOTE:  might have concurency problems
+        }
+        
+        public async Task DeleteAsync(Guid id)
+        {
+            var exisitingCategory = await this.context.Categories.FindAsync(id);
+            if (exisitingCategory == null)
+            {
+                throw new NotFoundException("Category not found.");
+            }
+            
+            this.context.Categories.Remove(exisitingCategory); 
+            await this.context.SaveChangesAsync();
         }
     }
 }
