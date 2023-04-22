@@ -11,4 +11,7 @@ export interface Expense {
     user: User;
     date: Date;
     categories: Category[];
+
+    // Calculated
+    totalCategories: number;
 }

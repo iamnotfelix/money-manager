@@ -9,4 +9,7 @@ export interface User {
     password: string;
     expenses: Expense[];
     categories: Category[];
+
+    // Calculated
+    totalSpent: number[];
 }
