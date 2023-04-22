@@ -32,7 +32,7 @@ namespace moneyManager.Services
             }
             
             var totalRecords = await this.context.Expenses.CountAsync();
-            var expensesDtos = expenses.Select(expense => expense.AsDto()).ToList();
+            var expensesDtos = expenses.Select(expense => expense.AsDto());
 
             return PagedResponse<IExpenseDto>.CreatePagedReponse(expensesDtos, filter, totalRecords, uriBuilder, route);
         }
@@ -61,6 +61,44 @@ namespace moneyManager.Services
             }
 
             return expense.AsGetByIdDto();
+        }
+
+        public async Task<PagedResponse<IEnumerable<IExpenseDto>>> GetExpensesHigherThanAsync(int nr, PaginationFilter filter, string route)
+        {
+            var expenses = await this.context.Expenses
+                .Where(expense => expense.Amount > nr)
+                .Skip((filter.PageNumber - 1) * filter.PageSize)
+                .Take(filter.PageSize)
+                .ToListAsync();
+
+            if (expenses is null)
+            {
+                throw new NotFoundException("Expenses not found.");
+            }
+
+            var totalRecords = await this.context.Expenses.Where(expense => expense.Amount > nr).CountAsync();
+            var expensesDtos = expenses.Select(expense => expense.AsDto());
+
+            return PagedResponse<IExpenseDto>.CreatePagedReponse(expensesDtos, filter, totalRecords, uriBuilder, route);
+        }
+
+        public async Task<PagedResponse<IEnumerable<IExpenseDto>>> GetExpensesTotalAsync(PaginationFilter filter, string route)
+        {
+            var expenses = await this.context.Expenses
+                .Include(e => e.ExpenseCategories)
+                .Skip((filter.PageNumber - 1) * filter.PageSize)
+                .Take(filter.PageSize)
+                .ToListAsync();
+
+            if (expenses is null)
+            {
+                throw new NotFoundException("Expenses not found.");
+            }
+            
+            var totalRecords = await this.context.Expenses.CountAsync();
+            var expensesDtos = expenses.Select(expense => expense.AsTotalDto());
+
+            return PagedResponse<IExpenseDto>.CreatePagedReponse(expensesDtos, filter, totalRecords, uriBuilder, route);
         }
 
         public async Task<IExpenseDto> AddAsync(IExpenseDto entity)
@@ -189,25 +227,6 @@ namespace moneyManager.Services
             
             this.context.Expenses.Remove(exisitingExpense);
             await this.context.SaveChangesAsync();
-        }
-
-        public async Task<PagedResponse<IEnumerable<IExpenseDto>>> GetExpensesHigherThan(int nr, PaginationFilter filter, string route)
-        {
-            var expenses = await this.context.Expenses
-                .Where(expense => expense.Amount > nr)
-                .Skip((filter.PageNumber - 1) * filter.PageSize)
-                .Take(filter.PageSize)
-                .ToListAsync();
-
-            if (expenses is null)
-            {
-                throw new NotFoundException("Expenses not found.");
-            }
-
-            var totalRecords = await this.context.Expenses.Where(expense => expense.Amount > nr).CountAsync();
-            var expensesDtos = expenses.Select(expense => expense.AsDto());
-
-            return PagedResponse<IExpenseDto>.CreatePagedReponse(expensesDtos, filter, totalRecords, uriBuilder, route);
         }
     }
 }

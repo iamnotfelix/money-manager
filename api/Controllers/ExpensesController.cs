@@ -21,11 +21,11 @@ namespace moneyManager.Controllers
 
         // GET /expenses?pageNumber=:pageNumber&pageSize=:pageSize
         [HttpGet]
-        public async Task<ActionResult<PagedResponse<IEnumerable<ExpenseDto>>>> GetExpensesAsync([FromQuery] PaginationFilter paginationFilter) 
+        public async Task<ActionResult<PagedResponse<IEnumerable<ExpenseDto>>>> GetExpensesAsync([FromQuery] PaginationFilter filter) 
         {
             try
             {
-                var expenses = await this.service.GetAllAsync(paginationFilter, Request.Path.Value!);
+                var expenses = await this.service.GetAllAsync(filter, Request.Path.Value!);
                 var castedExpenses = new PagedResponse<IEnumerable<ExpenseDto>>(expenses);
                 return Ok(castedExpenses);
             }
@@ -52,12 +52,28 @@ namespace moneyManager.Controllers
 
         // GET /expenses/filter/{nr}
         [HttpGet("filter/{nr}")]
-        public async Task<ActionResult<PagedResponse<IEnumerable<ExpenseDto>>>> GetExpensesHigherThan(int nr, [FromQuery] PaginationFilter paginationFilter)
+        public async Task<ActionResult<PagedResponse<IEnumerable<ExpenseDto>>>> GetExpensesHigherThanAsync(int nr, [FromQuery] PaginationFilter filter)
         {
             try
             {
-                var expenses = await this.service.GetExpensesHigherThan(nr, paginationFilter, Request.Path.Value!);
+                var expenses = await this.service.GetExpensesHigherThanAsync(nr, filter, Request.Path.Value!);
                 var castedExpenses = new PagedResponse<IEnumerable<ExpenseDto>>(expenses);
+                return Ok(castedExpenses);
+            }
+            catch (NotFoundException e)
+            {
+                return NotFound(e.Message);
+            }
+        }
+        
+        // GET /expenses/total?pageNumber=:pageNumber&pageSize=:pageSize
+        [HttpGet("total")]
+        public async Task<ActionResult<PagedResponse<IEnumerable<ExpenseDto>>>> GetExpensesTotalAsync([FromQuery] PaginationFilter filter)
+        {
+            try
+            {
+                var expenses = await this.service.GetExpensesTotalAsync(filter, Request.Path.Value!);
+                var castedExpenses = new PagedResponse<IEnumerable<ExpenseTotalDto>>(expenses);
                 return Ok(castedExpenses);
             }
             catch (NotFoundException e)
