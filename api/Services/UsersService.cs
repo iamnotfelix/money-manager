@@ -5,6 +5,7 @@ using moneyManager.Exceptions;
 using Microsoft.AspNetCore.Mvc;
 using moneyManager.Pagination;
 using Microsoft.EntityFrameworkCore;
+using moneyManager.Filters;
 
 namespace moneyManager.Services
 {
@@ -28,7 +29,7 @@ namespace moneyManager.Services
 
             if (users is null)
             {
-                throw new NotFoundException();
+                throw new NotFoundException("Users not found.");
             }
 
             var totalRecords = await this.context.Categories.CountAsync();
@@ -54,6 +55,21 @@ namespace moneyManager.Services
                 .LoadAsync();
 
             return user.AsGetByIdDto();
+        }
+
+        public async Task<IEnumerable<UserDto>> SearchUserAsync(SearchFilter filter)
+        {
+            var users = await this.context.Users
+                .Where(u => u.Username!.StartsWith(filter.Text, StringComparison.OrdinalIgnoreCase))
+                .Take(filter.Number)
+                .ToListAsync();
+
+            if (users is null)
+            {
+                throw new NotFoundException("Users not found.");
+            }
+
+            return users.Select(user => user.AsDto());
         }
 
         public async Task<IUserDto> AddAsync(IUserDto entity)
