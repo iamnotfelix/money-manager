@@ -18,6 +18,7 @@ import { CategoryDelete } from './Pages/Categories/CategoryDelete'
 import { UserAdd } from './Pages/Users/UserAdd'
 import { UserUpdate } from './Pages/Users/UserUpdate'
 import { UserDelete } from './Pages/Users/UserDelete'
+import { StatisticalReport } from './Pages/StatisticalReport'
 
 function App() {
   return (
@@ -25,6 +26,8 @@ function App() {
         <Navbar/>
       	<Routes>
 			<Route path='/' element={<Home/>}></Route>
+
+			<Route path='/report' element={<StatisticalReport/>}></Route>
 
 			<Route path='/expenses' element={<Expenses/>}></Route>
 			<Route path='/expenses/:id' element={<ExpenseDetailed/>}></Route>

@@ -49,6 +49,9 @@ export const Navbar = () => {
                         <SimpleLink to={"/users"}>
                             <NavbarButton variant='text'>Users</NavbarButton>
                         </SimpleLink>
+                        <SimpleLink to={"/report"}>
+                            <NavbarButton variant='text'>Statistical report</NavbarButton>
+                        </SimpleLink>
                     </Stack>
                 </Container>
             </StyledToolbar>
