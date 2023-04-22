@@ -8,4 +8,7 @@ export interface Category {
     userId: string;
     user: User;
     expenses: Expense[];
+
+    // Calculated
+    total: number;
 }
