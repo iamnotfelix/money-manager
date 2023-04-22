@@ -80,5 +80,43 @@ namespace moneyManager
                 Categories = user.Categories.Select(e => e.AsDto()).ToList()
             };
         }
+
+        public static ExpenseTotalDto AsTotalDto(this Expense expense)
+        {
+            return new ExpenseTotalDto 
+            {
+                Id = expense.Id,
+                Amount = expense.Amount,
+                PaymentType = expense.PaymentType,
+                Description = expense.Description,
+                Currency = expense.Currency,
+                UserId = expense.UserId,
+                Date = expense.Date,
+                TotalCategories = (expense.ExpenseCategories is not null ? expense.ExpenseCategories.Count() : 0)
+            };
+        }
+
+        public static CategoryTotalDto AsTotalDto(this Category category)
+        {
+            return new CategoryTotalDto
+            {
+                Id = category.Id,
+                Name = category.Name,
+                Description = category.Description,
+                UserId = category.UserId,
+                Total = (category.ExpenseCategories is not null ? category.ExpenseCategories.Sum(ec => (ec.Expense is not null ? ec.Expense.Amount : 0)) : 0)
+            };
+        }
+
+        public static UserTotalDto AsTotalDto(this User user)
+        {
+            return new UserTotalDto
+            {
+                Id = user.Id,
+                Username = user.Username,
+                Name = user.Name,
+                TotalSpent = (user.Expenses is not null ? user.Expenses.Sum(e => e.Amount) : 0)
+            };
+        }
     }
 }
