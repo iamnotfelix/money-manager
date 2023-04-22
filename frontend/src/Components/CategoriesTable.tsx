@@ -23,7 +23,7 @@ export const CategoriesTable = () => {
     const pageSize = 5;
 	const [next, setNext] = useState("");
 	const [previous, setPrevious] = useState("");
-	const [current, setCurrent] = useState(import.meta.env.VITE_REACT_API_BACKEND + `/categories?pageNumber=1&pageSize=${pageSize}`)
+	const [current, setCurrent] = useState(import.meta.env.VITE_REACT_API_BACKEND + `/categories/total?pageNumber=1&pageSize=${pageSize}`)
 	const [previousDisabled, setPreviousDisabled] = useState(false);
 	const [nextDisabled, setNextDisabled] = useState(false);
 
@@ -77,6 +77,7 @@ export const CategoriesTable = () => {
                         <TableCell align="left">Index</TableCell>
                         <TableCell align="center">Name</TableCell>
                         <TableCell align="center">Description</TableCell>
+                        <TableCell align="center">Total</TableCell>
                         <TableCell align="center">User</TableCell>
                         <TableCell align="center"></TableCell>
                     </TableRow>
@@ -87,6 +88,7 @@ export const CategoriesTable = () => {
                             <TableCell align="left" key={"index" + index.toString()}>{index + 1}</TableCell>
                             <TableCell align="center" key={"name" + index.toString()}>{category.name}</TableCell>
                             <TableCell align="left" key={"description" + index.toString()}>{category.description}</TableCell>
+                            <TableCell align="center" key={"total" + index.toString()}>{category.total}</TableCell>
                             <TableCell align="center" key={"username" + index.toString()}>
                                 <SimpleLink to={`/users/${category.user.id}`}> <Typography color="secondary">{category.user.username}</Typography></SimpleLink>
                             </TableCell>

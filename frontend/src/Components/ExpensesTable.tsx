@@ -25,7 +25,7 @@ export const ExpensesTable = () => {
 	const pageSize = 5;
 	const [next, setNext] = useState("");
 	const [previous, setPrevious] = useState("");
-	const [current, setCurrent] = useState(import.meta.env.VITE_REACT_API_BACKEND + `/expenses?pageNumber=1&pageSize=${pageSize}`)
+	const [current, setCurrent] = useState(import.meta.env.VITE_REACT_API_BACKEND + `/expenses/total?pageNumber=1&pageSize=${pageSize}`)
 	const [previousDisabled, setPreviousDisabled] = useState(false);
 	const [nextDisabled, setNextDisabled] = useState(false);
 
@@ -96,6 +96,7 @@ export const ExpensesTable = () => {
                         <TableCell align="center">Description</TableCell>
                         <TableCell align="center">Currency</TableCell>
                         <TableCell align="center">Date</TableCell>
+                        <TableCell align="center">Total categories</TableCell>
                         <TableCell align="center">User</TableCell>
                         <TableCell align="center"></TableCell>
                     </TableRow>
@@ -109,6 +110,7 @@ export const ExpensesTable = () => {
                             <TableCell align="left" key={"description" + index.toString()}>{expense.description}</TableCell>
                             <TableCell align="center" key={"currency" + index.toString()}>{expense.currency}</TableCell>
                             <TableCell align="center" key={"date" + index.toString()}>{expense.date.toString()}</TableCell>
+                            <TableCell align="center" key={"total" + index.toString()}>{expense.totalCategories}</TableCell>
                             <TableCell align="center" key={"username" + index.toString()}>
                                 <SimpleLink to={`/users/${expense.user.id}`}> <Typography color="secondary">{expense.user.username}</Typography></SimpleLink>
                             </TableCell>
