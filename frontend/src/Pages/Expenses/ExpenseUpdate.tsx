@@ -39,6 +39,7 @@ export const ExpenseUpdate = () => {
             setCurrency(expense.currency);
             setDescription(expense.description);
             setDate(dayjs(expense.date));
+            setCategories(expense.categories);
         }
         fetchExpense();
         setLoading(false);
@@ -56,7 +57,6 @@ export const ExpenseUpdate = () => {
 
     const validate = () => {
         let valid = true;
-        
         setAmountError(false);
         setDescriptionError(false);
         setDateError(false);
@@ -236,6 +236,7 @@ export const ExpenseUpdate = () => {
                     onChange={(e: any, value: any) => {
                         setCategories(value);
                     }}
+                    value={categories}
                     filterOptions={(x: any) => x}
                     sx={{m: 2, width: "25ch"}}
                 />
