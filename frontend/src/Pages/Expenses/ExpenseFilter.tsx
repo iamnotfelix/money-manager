@@ -1,38 +1,45 @@
-import Table from '@mui/material/Table';
-import TableBody from '@mui/material/TableBody';
-import TableCell from '@mui/material/TableCell';
-import TableContainer from '@mui/material/TableContainer';
-import TableHead from '@mui/material/TableHead';
-import TableRow from '@mui/material/TableRow';
-import Paper from '@mui/material/Paper';
-import { Box, Container, IconButton, Stack, TextField, Typography, styled } from '@mui/material';
+import { Box, Container, IconButton, TextField, Typography } from '@mui/material';
 import { Expense } from '../../Models/Expense';
 import { Link } from 'react-router-dom'
-import CreateIcon from '@mui/icons-material/Create';
 import AddIcon from '@mui/icons-material/Add';
 import { useEffect, useState } from 'react';
-import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft';
-import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
+import { useTableNavigator } from '../../Components/Tables/useTableNavigator';
+import { Loading } from '../../Components/Loading';
+import { TableComponenet } from '../../Components/Tables/TableComponent';
+import { TableContent } from '../../Components/Tables/TableContent';
+import { TableHeader } from '../../Components/Tables/TableHeader';
+import { TableNavigator } from '../../Components/Tables/TableNavigator';
 
+const header = ["Index", "Amount", "Payment type", "Description", "Currency", "Date", "User", ""];
+const contentKeys = ["amount", "paymentType", "description", "currency", "date"];
+const pageSize = 5;
+const initialNavigatorValues = {
+    pageSize: pageSize,
+    next: "",
+    previous: "",
+    current: import.meta.env.VITE_REACT_API_BACKEND + `/expenses/filter/-1?pageNumber=1&pageSize=${pageSize}`,
+    previousDisabled: false,
+    nextDisabled: false
+}
 
 export const ExpenseFilter = () => {
-    const initExpenses: any[] = [];
-    const [expenses, setExpenses] = useState(initExpenses);
+    const [expenses, setExpenses] = useState<Expense []>([]);
     
     const [loading, setLoading] = useState(false);
     const [filterValue, setFilterValue] = useState(-1);
 
-    const pageSize = 5;
-	const [next, setNext] = useState("");
-	const [previous, setPrevious] = useState("");
-	const [current, setCurrent] = useState(import.meta.env.VITE_REACT_API_BACKEND + `/expenses/filter/-1?pageNumber=1&pageSize=${pageSize}`)
-	const [previousDisabled, setPreviousDisabled] = useState(false);
-	const [nextDisabled, setNextDisabled] = useState(false);
+    const {
+        navigatorValues,
+        handleClickNext,
+        handleClickPrevious,
+        handlePageChange,
+        setCurrent
+    } = useTableNavigator(initialNavigatorValues)
 
     useEffect(() => {
         setLoading(true);
         const fetchData = async () => {
-            const data = await fetch(current);
+            const data = await fetch(navigatorValues.current);
             const res = await data.json();
             const expensesWithUsers: Expense[] = await Promise.all(res.data.map(async (expense: Expense) => {
                 const data = await fetch(import.meta.env.VITE_REACT_API_BACKEND + `/users/${expense.userId}`);
@@ -41,16 +48,11 @@ export const ExpenseFilter = () => {
                 return expense;
             }));
             setExpenses(expensesWithUsers);
-            const previousPage = res.previousPage ? res.previousPage : "";
-			const nextPage = res.nextPage ? res.nextPage : "";
-			setPrevious(previousPage);
-			setNext(nextPage);
-			setPreviousDisabled(previousPage.length > 0 ? false : true);
-			setNextDisabled(nextPage.toString().length > 0 ? false : true);
+            handlePageChange(res);
         }
         fetchData();
         setLoading(false);
-    }, [current]);
+    }, [navigatorValues.current]);
 
     useEffect(() => {
         setCurrent(import.meta.env.VITE_REACT_API_BACKEND + `/expenses/filter/${filterValue}?pageNumber=1&pageSize=${pageSize}`)
@@ -59,21 +61,6 @@ export const ExpenseFilter = () => {
     const handleNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setFilterValue(e.target.value == "" ? 0 : parseInt(e.target.value));
     }
-
-    const handleClickPrevious = () => {
-		setCurrent(previous);
-	}
-
-	const handleClickNext = () => {
-		setCurrent(next);
-	}
-
-    const SimpleLink = styled(Link) ({
-        color: 'inherit',
-        padding: 0,
-        margin: 0,
-        textDecoration: 'none'
-    })
 
     return (
         <Container sx={{
@@ -114,52 +101,28 @@ export const ExpenseFilter = () => {
                 </Container>
             </Container>
             
-            <Box width="1100px">
-                {loading && <Stack alignItems="center" mt={4}><Typography variant="h3" gutterBottom>Still loading...</Typography></Stack>}
+            <Box> 
+                {loading && <Loading/>}
                 {!loading &&
                 <Box>
-                <TableContainer component={Paper}>
-                    <Table aria-label="simple table">
-                        <TableHead>
-                        <TableRow>
-                            <TableCell align="left">Index</TableCell>
-                            <TableCell align="center">Amount</TableCell>
-                            <TableCell align="center">Payment Type</TableCell>
-                            <TableCell align="center">Description</TableCell>
-                            <TableCell align="center">Currency</TableCell>
-                            <TableCell align="center">Date</TableCell>
-                            <TableCell align="center">User</TableCell>
-                            <TableCell align="center"></TableCell>
-                        </TableRow>
-                        </TableHead>
-                        <TableBody>
-                        {!loading && expenses.map((expense: Expense, index) => (
-                            <TableRow key={index}> 
-                                <TableCell align="left" key={"index" + index.toString()}>{index + 1}</TableCell>
-                                <TableCell align="center" key={"amount" + index.toString()}>{expense.amount}</TableCell>
-                                <TableCell align="center" key={"paymentType" + index.toString()}>{expense.paymentType}</TableCell>
-                                <TableCell align="left" key={"description" + index.toString()}>{expense.description}</TableCell>
-                                <TableCell align="center" key={"currency" + index.toString()}>{expense.currency}</TableCell>
-                                <TableCell align="center" key={"date" + index.toString()}>{expense.date.toString()}</TableCell>
-                                <TableCell align="center" key={"username" + index.toString()}>
-                                    <SimpleLink to={`/users/${expense.user.id}`}> <Typography color="secondary">{expense.user.username}</Typography></SimpleLink>
-                                </TableCell>
-                                <TableCell>
-                                    <SimpleLink to={`/expenses/${expense.id}`}><CreateIcon/></SimpleLink>
-                                </TableCell>
-                            </TableRow>
-                        ))}
-                        </TableBody>
-                    </Table>
-                </TableContainer>
-                <Stack direction='row' justifyContent="center" m={4}>
-                    <IconButton size="large" onClick={handleClickPrevious} disabled={previousDisabled}>
-                        <KeyboardArrowLeftIcon fontSize="large"/>
-                    </IconButton>
-                    <IconButton size="large" onClick={handleClickNext} disabled={nextDisabled}>
-                        <KeyboardArrowRightIcon fontSize="large"/>
-                    </IconButton>
-                </Stack>
+                    <TableComponenet>
+                        <TableHeader
+                            header={header}
+                            />
+                        <TableContent
+                            content={expenses}
+                            contentKeys={contentKeys}
+                            detailsLink="/expenses"
+                            hasUser={true}
+                            >
+                        </TableContent>
+                    </TableComponenet>
+                    <TableNavigator
+                        handleClickPrevious={handleClickPrevious}
+                        handleClickNext={handleClickNext}
+                        previousDisabled={navigatorValues.previousDisabled}
+                        nextDisabled={navigatorValues.nextDisabled}
+                    />
                 </Box>}
             </Box>
         </Container>
