@@ -1,5 +1,5 @@
 import { Container, IconButton, Typography } from "@mui/material";
-import { CategoriesTable } from "../../Components/CategoriesTable";
+import { CategoriesTable } from "../../Components/Tables/CategoriesTable";
 import AddIcon from '@mui/icons-material/Add';
 import { Link } from "react-router-dom";
 

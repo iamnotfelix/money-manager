@@ -1,5 +1,5 @@
 import { Container, IconButton, Typography } from "@mui/material";
-import { UsersTable } from "../../Components/UsersTable";
+import { UsersTable } from "../../Components/Tables/UsersTable";
 import AddIcon from '@mui/icons-material/Add';
 import { Link } from "react-router-dom";
 
