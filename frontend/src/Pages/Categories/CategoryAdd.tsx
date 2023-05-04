@@ -1,66 +1,47 @@
-import { Box, Button, FormGroup, TextField } from "@mui/material"
+import { FormGroup, Grid, Paper } from "@mui/material"
 import { useEffect, useState } from "react"
 import { User } from "../../Models/User";
 import { useNavigate } from "react-router-dom";
 import { debounce } from "lodash";
-import { AutoComplete } from "../../Components/Inputs/AutoComplete";
+import { AutoComplete } from "../../Components/Forms/AutoComplete";
+import { useForm } from "../../Components/Forms/useForm";
+import { FormComponent } from "../../Components/Forms/FormComponent";
+import { FormHeader } from "../../Components/Forms/FormHeader";
+import { InputComponent } from "../../Components/Forms/InputComponent";
+import { FormButton } from "../../Components/Forms/FormButton";
+
+const initialValues = {
+    name: "",
+    description: "",
+    user: null
+}
+
+const initialErrorValues = {
+    nameError: false,
+    nameText: "",
+    descriptionError: false,
+    descriptionText: "",
+    userError: false,
+    userText: ""
+}
 
 export const CategoryAdd = () => {
-    const [name, setName] = useState("");
-    const [description, setDescription] = useState("");
-    const [user, setUser] = useState<User | null>();
-
-    const [users, setUsers] = useState([]);
-
     const navigate = useNavigate();
 
-    const [nameError, setNameError] = useState(false);
-    const [descriptionError, setDescriptionError] = useState(false);
-    const [userError, setUserError] = useState(false);
+    const {
+        values,
+        errors,
+        setErrors,
+        handleChange,
+        handleInputChange
+    } = useForm(initialValues, initialErrorValues);
 
-    const [nameText, setNameText] = useState("");
-    const [descriptionText, setDescriptionText] = useState("");
-    const [userText, setUserText] = useState("");
-
-    const validate = () => {
-        let valid = true;
-        
-        setNameError(false);
-        setDescriptionError(false);
-        setUserError(false);
-
-        setNameText("");
-        setDescriptionText("MAX 250 characters");
-        setUserText("");
-        
-        if (!(/^[a-zA-Z ]+$/).test(name)) {
-            setNameError(true);
-            setNameText("Name must contain only letters and spaces.");
-            valid = false;
-        }
-        if (description.length > 250) {
-            setDescriptionError(true);
-            setDescriptionText("Description must be less than 250 characters.");
-            valid = false;
-        }
-        if (description.length == 0) {
-            setDescriptionError(true);
-            setDescriptionText("Description cannot be empty.");
-            valid = false;
-        }
-        if (user == null) {
-            setUserError(true);
-            setUserText("You must select a user.")
-            valid = false;
-        }
-
-        return valid;
-    }
+    const [allUsers, setAllUsers] = useState([]);
 
     const fetchUsers = async (text: string, number: number) => {
         const data = await fetch(import.meta.env.VITE_REACT_API_BACKEND + `/users/search?text=${text}&number=${number}`);
         const res = await data.json();
-        setUsers(res);
+        setAllUsers(res);
     }
 
     const debouncedFetchUsers = debounce(async (text: string, number: number) => {
@@ -78,21 +59,51 @@ export const CategoryAdd = () => {
 		if (reason === "input" && value.length > 0) {
 			debouncedFetchUsers(value, 10);
 		} else if (reason === "input") {
-            setUsers([]);
+            setAllUsers([]);
         }
 	};
 
+    const validate = () => {
+        let valid = true;
+        
+        var errorsCopy = errors;
+        if (!(/^[a-zA-Z ]+$/).test(values.name)) {
+            errorsCopy = {
+                ...errorsCopy,
+                nameError: true,
+                nameText: "Name must contain only letters and spaces."
+            }
+            valid = false;
+        }
+        if (values.description.length > 250 || values.description.length == 0) {
+            errorsCopy = {
+                ...errorsCopy,
+                descriptionError: true,
+                descriptionText: "Description must be between 1 and 250 characters."
+            }
+            valid = false;
+        }
+        if (values.user == null) {
+            errorsCopy = {
+                ...errorsCopy,
+                userError: true,
+                userText: "You must select a user."
+            };
+            valid = false;
+        }
+        setErrors(errorsCopy);
+
+        return valid;
+    }
+
     const handleSubmit = async () => {
         const valid = validate();
-
-        if (!valid) {
-            return;
-        }
+        if (!valid) { return; }
 
         const body = {
-            name: name,
-            description: description,
-            userId: user!.id
+            name: values.name,
+            description: values.description,
+            userId: values.user!.id
         }
 
         const response = await window.fetch(import.meta.env.VITE_REACT_API_BACKEND + `/categories`, {
@@ -108,77 +119,53 @@ export const CategoryAdd = () => {
     }
 
     return (
-        <Box>
+        <Paper sx={{m: "auto", width: "60%", mt: 4, p:3}}>
+        <FormHeader to="/categories" title="Add category" variant="h2"/>
+        <FormComponent>
             <FormGroup sx={{ display: "flex", alignItems: "center"}}>
-                <TextField
-                    type="text"
-                    variant='outlined'
-                    color='primary'
-                    label="Name"
-                    onChange={e => {
-                        setName(e.target.value);
-                        setNameError(false);
-                        setNameText("");
-                    }}
-                    error={nameError}
-                    helperText={nameText}
-                    fullWidth
-                    value={name}
-                    required
-                    sx={{m: 2, width: "25ch"}}
-                />
-                <TextField
-                    type="text"
-                    variant='outlined'
-                    color='primary'
-                    label="Description"
-                    onChange={e => {
-                        setDescription(e.target.value);
-                        setDescriptionError(false);
-                        setDescriptionText("MAX 250 characters");
-                    }}
-                    error={descriptionError}
-                    helperText={descriptionText}
-                    value={description}
-                    fullWidth
-                    sx={{m: 2, width: "50ch"}}
-                />
-                <AutoComplete
-                    options={users}
-                    getOptionLabel={(option: User) => option.username}
-                    label="User"
-                    error={userError}
-                    helperText={userText}
-                    onInputChange={handleUserInputChange}
-                    onChange={(e: any, value: any) => {
-                        setUser(value);
-                        setUserError(false);
-                        setUserText("");
-                    }}
-                    filterOptions={(x: any) => x}
-                    sx={{m: 2, width: "25ch"}}
-                />
-                {/* <TextField
-                    select
-                    label="User"
-                    required
-                    onChange={e => {
-                        setUser(e.target.value);
-                        setUserError(false);
-                        setUserText("");
-                    }}
-                    error={userError}
-                    helperText={userText}
-                    sx={{m: 2, width: "25ch"}}
-                >
-                    {users.map((option: User) => (
-                        <MenuItem key={option.id} value={option.id}>
-                        {option.username}
-                        </MenuItem>
-                    ))}
-                </TextField> */}
-                <Button variant="outlined" color="primary" type="submit" sx={{m: 4, width: "25ch"}} onClick={handleSubmit}>Add</Button>
+                <Grid container spacing={3} alignItems="center" justifyContent="center">
+                    <Grid item xs={12}>
+                        <InputComponent
+                            label="Name"
+                            name="name"
+                            onChange={handleChange}
+                            onInput={handleInputChange}
+                            error={errors.nameError}
+                            helperText={errors.nameText}
+                            value={values.name}
+                        />
+                    </Grid>
+                    <Grid item xs={12}>
+                        <InputComponent
+                            label="Description"
+                            name="description"
+                            onChange={handleChange}
+                            onInput={handleInputChange}
+                            error={errors.descriptionError}
+                            helperText={errors.descriptionText}
+                            value={values.description}
+                        />
+                    </Grid>
+                    <Grid item xs={12}>
+                        <AutoComplete
+                            options={allUsers}
+                            getOptionLabel={(option: User) => option.username}
+                            label="User"
+                            name="user"
+                            error={errors.userError}
+                            helperText={errors.userText}
+                            onInputChange={handleUserInputChange}
+                            onChange={handleChange}
+                            onInput={handleInputChange}
+                            filterOptions={(x: any) => x}
+                        />
+                    </Grid>
+                    <Grid item xs={12}>
+                        <FormButton onClick={handleSubmit} text="Add"/>
+                    </Grid>
+                </Grid>
             </FormGroup>
-        </Box>
+        </FormComponent>
+        </Paper>
     );
 }
