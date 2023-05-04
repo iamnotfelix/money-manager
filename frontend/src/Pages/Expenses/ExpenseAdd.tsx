@@ -1,78 +1,58 @@
-import { Box, Button, FormGroup, MenuItem, TextField } from "@mui/material"
-import { useEffect, useState } from "react"
-import { DateField } from '@mui/x-date-pickers/DateField';
-import dayjs, { Dayjs } from "dayjs";
-import { LocalizationProvider } from "@mui/x-date-pickers";
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { Grid, Paper } from "@mui/material";
+import { useEffect, useState } from "react";
 import { User } from "../../Models/User";
 import { useNavigate } from "react-router-dom";
 import { Category } from "../../Models/Category";
-import { debounce } from "lodash"
-import { AutoComplete } from "../../Components/Inputs/AutoComplete"
+import { debounce } from "lodash";
+import { AutoComplete } from "../../Components/Forms/AutoComplete"
+import { useForm } from "../../Components/Forms/useForm";
+import { FormComponent } from "../../Components/Forms/FormComponent";
+import { InputComponent } from "../../Components/Forms/InputComponent";
+import { SelectComponent } from "../../Components/Forms/SelectComponent";
+import { FormButton } from "../../Components/Forms/FormButton";
+import { FormHeader } from "../../Components/Forms/FormHeader";
+
+const initialValues = {
+    amount: 0,
+    paymentType: "",
+    description: "",
+    currency: "",
+    date: "2023-04-01",
+    user: null,
+    categories: []
+}
+
+const initialErrorValues = {
+    amountError: false,
+    amountText: "",
+    paymentTypeError: false,
+    paymentTypeText: "",
+    descriptionError: false,
+    descriptionText: "",
+    currencyError: false,
+    currencyText: "",
+    dateError: false,
+    dateText: "",
+    userError: false,
+    userText: ""
+}
+
+const currencies = [ { value: 'Lei', label: 'Lei' }, { value: 'Euro', label: 'Euro' } ];
+const paymentTypes = [ { value:"Cash", label:"Cash" }, { value:"BT", label:"BT" }, { value:"Revolut", label:"Revolut" }, { value:"Alpha", label:"Alpha" } ];
 
 export const ExpenseAdd = () => {
-    const [amount, setAmount] = useState(0);
-    const [paymentType, setPaymentType] = useState("Revolut");
-    const [description, setDescription] = useState("");
-    const [currency, setCurrency] = useState("Lei");
-    const [date, setDate] = useState<Dayjs | null>(dayjs('2023-01-1'));
-    const [user, setUser] = useState<User | null>(null);
-    const [categories, setCategories] = useState<Category []>([]);
-
-    const [users, setUsers] = useState<User []>([]);
-    const [allCategories, setAllCategories] = useState<Category []>([]);
-
-    const currencies = [ { value: 'Lei', label: 'Lei' }, { value: 'Euro', label: 'Euro' } ];
-    const paymentTypes = [ { value:"Cash", label:"Cash" }, { value:"BT", label:"BT" }, { value:"Revolut", label:"Revolut" }, { value:"Alpha", label:"Alpha" } ];
-
     const navigate = useNavigate();
 
-    const [amountError, setAmountError] = useState(false);
-    const [descriptionError, setDescriptionError] = useState(false);
-    const [dateError, setDateError] = useState(false);
-    const [userError, setUserError] = useState(false);
+    const {
+        values,
+        errors,
+        setErrors,
+        handleChange,
+        handleInputChange
+    } = useForm(initialValues, initialErrorValues);
 
-    const [amountText, setAmountText] = useState("");
-    const [descriptionText, setDescriptionText] = useState("");
-    const [dateText, setDateText] = useState("");
-    const [userText, setUserText] = useState("");
-
-    const validate = () => {
-        let valid = true;
-        
-        setAmountError(false);
-        setDescriptionError(false);
-        setDateError(false);
-        setUserError(false);
-
-        setAmountText("");
-        setDescriptionText("MAX 250 characters");
-        setDateText("");
-        setUserText("");
-        
-        if (amount < 0) {
-            setAmountError(true);
-            setAmountText("Amount cannot be negative.");
-            valid = false;
-        }
-        if (description.length > 250) {
-            setDescriptionError(true);
-            setDescriptionText("Description must be less than 250 characters.");
-            valid = false;
-        }
-        if (description.length == 0) {
-            setDescriptionError(true);
-            setDescriptionText("Description cannot be empty.");
-            valid = false;
-        }
-        if (user == null) {
-            setUserError(true);
-            setUserText("You must select a user.")
-            valid = false;
-        }
-
-        return valid;
-    }
+    const [allUsers, setAllUsers] = useState<User []>([]);
+    const [allCategories, setAllCategories] = useState<Category []>([]);
 
     const fetchCategories = async (text: string, number: number) => {
         const data = await fetch(import.meta.env.VITE_REACT_API_BACKEND + `/categories/search?text=${text}&number=${number}`);
@@ -83,7 +63,7 @@ export const ExpenseAdd = () => {
     const fetchUsers = async (text: string, number: number) => {
         const data = await fetch(import.meta.env.VITE_REACT_API_BACKEND + `/users/search?text=${text}&number=${number}`);
         const res = await data.json();
-        setUsers(res);
+        setAllUsers(res);
     }
 
     const debouncedFetchUsers = debounce(async (text: string, number: number) => {
@@ -110,7 +90,7 @@ export const ExpenseAdd = () => {
 		if (reason === "input" && value.length > 0) {
 			debouncedFetchUsers(value, 10);
 		} else if (reason === "input") {
-            setUsers([]);
+            setAllUsers([]);
         }
 	};
 
@@ -120,28 +100,84 @@ export const ExpenseAdd = () => {
 		} 
     }
 
+    const validate = () => {
+        var valid = true;
+
+        var errorsCopy = errors;
+        if (values.amount < 0) {
+            errorsCopy = {
+                ...errorsCopy,
+                amountError: true,
+                amountText: "Amount cannot be negative."
+            };
+            valid = false;
+        }
+        if (values.paymentType.length == 0) {
+            errorsCopy = {
+                ...errorsCopy,
+                paymentTypeError: true,
+                paymentTypeText: "You have to choose a payment type."
+            };
+            valid = false;
+        }
+        if (values.currency.length == 0) {
+            errorsCopy = {
+                ...errorsCopy,
+                currencyError: true,
+                currencyText: "You have to choose a currency."
+            };
+            valid = false;
+        }
+        const selectedDate = new Date(values.date);
+        const minDate = new Date("2000-01-01");
+        const maxDate = new Date("2100-01-01");
+        if (selectedDate < minDate || selectedDate > maxDate) {
+            errorsCopy = {
+                ...errorsCopy,
+                dateError: true,
+                dateText: "Date out of permited range."
+            };
+            valid = false;
+        }
+        if (values.user == null) {
+            errorsCopy = {
+                ...errorsCopy,
+                userError: true,
+                userText: "You must select a user."
+            };
+            valid = false;
+        }
+        if (values.description.length > 250 || values.description.length == 0) {
+            errorsCopy = {
+                ...errorsCopy,
+                descriptionError: true,
+                descriptionText: "Description must be between 1 and 250 characters."
+            };
+            valid = false;
+        }
+        setErrors(errorsCopy);
+
+        return valid;
+    }
+
     const handleSubmit = async () => {
         const valid = validate();
-
-        if (!valid) {
-            return;
-        }
+        if (!valid) { return; }
 
         const body = {
-            amount: amount,
-            paymentType: paymentType,
-            description: description,
-            currency: currency,
-            userId: user!.id,
-            date: date,
-            expenseCategories: categories.map((category: Category) => {
+            amount: values.amount,
+            paymentType: values.paymentType,
+            description: values.description,
+            currency: values.currency,
+            userId: values.user!.id,
+            date: values.date,
+            expenseCategories: values.categories.map((category: Category) => {
                 return {
                     categoryId: category.id
                 };
             })
         }
-
-        const response = await window.fetch(import.meta.env.VITE_REACT_API_BACKEND + `/expenses`, {
+        const response = await fetch(import.meta.env.VITE_REACT_API_BACKEND + `/expenses`, {
             method: 'POST',
             mode: 'cors',
             headers: {
@@ -154,122 +190,104 @@ export const ExpenseAdd = () => {
     }
 
     return (
-        <Box>
-            <FormGroup sx={{ display: "flex", alignItems: "center"}}>
-                <TextField
-                    variant='outlined'
-                    type="number"
-                    label="Amount"
-                    color='primary'
-                    onChange={e => {
-                        setAmount(parseInt(e.target.value));
-                        setAmountError(false);
-                        setAmountText("");
-                    }}
-                    error={amountError}
-                    helperText={amountText}
-                    fullWidth
-                    value={amount}
-                    required
-                    sx={{m: 2, width: "25ch"}}
-                />
-                <TextField
-                    select
-                    label="Payment type"
-                    defaultValue="Revolut"
-                    helperText="Please select your payment type"
-                    required
-                    onChange={e => setPaymentType(e.target.value)}
-                    sx={{m: 2, width: "25ch"}}
-                >
-                    {paymentTypes.map((option) => (
-                        <MenuItem key={option.value} value={option.value}>
-                        {option.label}
-                        </MenuItem>
-                    ))}
-                </TextField>
-                <TextField
-                    select
-                    label="Currency"
-                    defaultValue="Lei"
-                    required
-                    onChange={e => setCurrency(e.target.value)}
-                    helperText="Please select your currency"
-                    sx={{m: 2, width: "25ch"}}
-                >
-                    {currencies.map((option) => (
-                        <MenuItem key={option.value} value={option.value}>
-                        {option.label}
-                        </MenuItem>
-                    ))}
-                </TextField>
-                <TextField
-                    variant='outlined'
-                    type="text"
-                    label="Description"
-                    color='primary'
-                    onChange={e => {
-                        setDescription(e.target.value);
-                        setDescriptionError(false);
-                        setDescriptionText("MAX 250 characters");
-                    }}
-                    error={descriptionError}
-                    helperText={descriptionText}
-                    value={description}
-                    fullWidth
-                    required
-                    sx={{m: 2, width: "50ch"}}
-                />
-                <LocalizationProvider dateAdapter={AdapterDayjs}>
-                    <DateField
+
+        <Paper sx={{m: "auto", width: "60%", mt: 4, p:3}}>
+        <FormHeader to="/expenses" title="Add expense" variant="h2"/>
+        <FormComponent>
+            <Grid container spacing={3} alignItems="center" justifyContent="center">
+                <Grid item xs={6}>
+                    <InputComponent
+                        type="number"
+                        label="Amount"
+                        name="amount"
+                        onChange={handleChange}
+                        onInput={handleInputChange}
+                        error={errors.amountError}
+                        helperText={errors.amountText}
+                        value={values.amount}
+                    />
+                </Grid>
+                <Grid item xs={6}>
+                    <SelectComponent
+                        label="Payment type"
+                        name="paymentType"
+                        onChange={handleChange}
+                        onInput={handleInputChange}
+                        error={errors.paymentTypeError}
+                        helperText={errors.paymentTypeText}
+                        value={values.paymentType}
+                        options={paymentTypes}
+                    />
+                </Grid>
+                <Grid item xs={6}>
+                    <SelectComponent
+                        label="Currency"
+                        name="currency"
+                        onChange={handleChange}
+                        onInput={handleInputChange}
+                        error={errors.currencyError}
+                        helperText={errors.currencyText}
+                        value={values.currency}
+                        options={currencies}
+                    />
+                </Grid>
+                <Grid item xs={6}>
+                    <InputComponent
+                        type="date"
                         label="Date"
-                        variant='outlined'
-                        color='primary'
-                        value={date}
-                        onChange={e => {
-                            setDate(e);
-                            setDateError(false);
-                            setDateText("");
-                        }}
-                        minDate={dayjs('2000-01-01')}
-                        maxDate={dayjs('2100-01-01')}
-                        onError={() => setDateText("Date must be between 01-01-2000 and 01-01-2100.")}
-                        helperText={dateText}
-                        required
-                        sx={{m: 2, width: "25ch"}}
-                        />
-                </LocalizationProvider>
-                <AutoComplete
-                    options={users}
-                    getOptionLabel={(option: User) => option.username}
-                    label="User"
-                    error={userError}
-                    helperText={userText}
-                    onInputChange={handleUserInputChange}
-                    onChange={(e: any, value: any) => {
-                        setUser(value);
-                        setUserError(false);
-                        setUserText("");
-                    }}
-                    filterOptions={(x: any) => x}
-                    sx={{m: 2, width: "25ch"}}
-                />
-                <AutoComplete
-                    multiple
-                    options={allCategories}
-                    getOptionLabel={(option: Category) => option.name}
-                    label="Categories"
-                    error={false}
-                    helperText=""
-                    onInputChange={handleCategoryInputChange}
-                    onChange={(e: any, value: any) => {
-                        setCategories(value);
-                    }}
-                    filterOptions={(x: any) => x}
-                    sx={{m: 2, width: "25ch"}}
-                />
-                <Button variant="outlined" color="primary" type="submit" sx={{m: 4, width: "25ch"}} onClick={handleSubmit}>Add</Button>
-            </FormGroup>
-        </Box>
+                        name="date"
+                        onChange={handleChange}
+                        onInput={handleInputChange}
+                        error={errors.dateError}
+                        helperText={errors.dateText}
+                        value={values.date}
+                    />
+                </Grid>
+                <Grid item xs={6}>
+                    <AutoComplete
+                        options={allUsers}
+                        getOptionLabel={(option: User) => option.username}
+                        label="User"
+                        name="user"
+                        error={errors.userError}
+                        helperText={errors.userText}
+                        onInputChange={handleUserInputChange}
+                        onChange={handleChange}
+                        onInput={handleInputChange}
+                        filterOptions={(x: any) => x}
+                    />
+                </Grid>
+                <Grid item xs={6}>
+                    <AutoComplete
+                        multiple
+                        options={allCategories}
+                        getOptionLabel={(option: Category) => option.name}
+                        label="Categories"
+                        name="categories"
+                        error={false}
+                        helperText=""
+                        onInputChange={handleCategoryInputChange}
+                        onChange={handleChange}
+                        onInput={handleInputChange}
+                        filterOptions={(x: any) => x}
+                    />
+                </Grid>
+                <Grid item xs={12}>
+                    <InputComponent
+                        label="Description"
+                        name="description"
+                        onChange={handleChange}
+                        onInput={handleInputChange}
+                        error={errors.descriptionError}
+                        helperText={errors.descriptionText}
+                        value={values.description}
+                    />
+                </Grid>
+                <Grid item xs={12}>
+                    <FormButton onClick={handleSubmit} text="Add"/>
+                </Grid>
+            </Grid>
+        </FormComponent>
+        </Paper>
     );
 }
