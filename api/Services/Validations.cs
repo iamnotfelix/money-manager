@@ -55,7 +55,7 @@ namespace moneyManager.Services
             } 
             if (category.Description is not null && category.Description.Count() > 250) 
             {
-                throw new ValidationException("Description is to long.");
+                throw new ValidationException("Description is too long.");
             }
         }
 
@@ -88,6 +88,33 @@ namespace moneyManager.Services
                 throw new ValidationException("Password is not valid.");
             } 
             
+        }
+
+        public static void Validate(this Income income) 
+        {
+            List<String> currencies = new List<string>()
+                { "lei", "ron", "euro", ""};
+
+            if (income is null)
+            {
+                throw new NotFoundException("Income not found.");
+            }
+            if (income.Name is not null && income.Name.Count() == 0)
+            {
+                throw new ValidationException("Name is not valid.");
+            }
+            if (income.Amount < 0)
+            {
+                throw new ValidationException("Amount not in range.");
+            }
+            if (income.Currency is not null && !currencies.Contains(income.Currency.ToLower())) 
+            {
+                throw new ValidationException("Currency does not exist.");
+            }
+            if (income.Comments is not null && income.Comments.Count() > 250) 
+            {
+                throw new ValidationException("Comments are too long.");
+            }
         }
     }
 }
