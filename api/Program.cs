@@ -28,6 +28,7 @@ builder.Services.AddSingleton<IUriBuilder>(o => new moneyManager.Pagination.UriB
 builder.Services.AddScoped<IService<IExpenseDto>, ExpensesService>();
 builder.Services.AddScoped<IService<ICategoryDto>, CategoriesService>();
 builder.Services.AddScoped<IService<IUserDto>, UsersService>();
+builder.Services.AddScoped<IService<IIncomeDto>, IncomesService>();
 
 builder.Services.AddControllers(options => options.SuppressAsyncSuffixInActionNames = false);
 // builder.Services.AddDbContext<DatabaseContext>(options => options.UseMySQL(builder.Configuration.GetConnectionString("Default")!));
