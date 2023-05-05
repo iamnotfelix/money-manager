@@ -34,6 +34,16 @@ namespace moneyManager.Pagination
             this.NextPage = response.NextPage;
             this.PreviousPage = response.PreviousPage;
         }
+       
+        public PagedResponse(PagedResponse<IEnumerable<IIncomeDto>> response) : base ((T) response.Data)
+        {
+            this.PageNumber = response.PageNumber;
+            this.PageSize = response.PageSize;
+            this.TotalPages = response.TotalPages;
+            this.TotalRecords = response.TotalRecords;
+            this.NextPage = response.NextPage;
+            this.PreviousPage = response.PreviousPage;
+        }
 
 
         public PagedResponse(T data, int pageNumber, int pageSize) : base(data)
