@@ -41,6 +41,19 @@ namespace moneyManager
             };
         }
 
+        public static IncomeDto AsDto(this Income income) 
+        {
+            return new IncomeDto
+            {
+                Id = income.Id,
+                Name = income.Name,
+                Amount = income.Amount,
+                Currency = income.Currency,
+                Comments = income.Comments,
+                UserId = income.UserId
+            };  
+        }
+
         public static GetByIdExpenseDto AsGetByIdDto(this Expense expense)
         {
             return new GetByIdExpenseDto
@@ -81,6 +94,19 @@ namespace moneyManager
             };
         }
 
+        public static GetByIdIncomeDto AsGetByIdDto(this Income income) 
+        {
+            return new GetByIdIncomeDto
+            {
+                Id = income.Id,
+                Name = income.Name,
+                Amount = income.Amount,
+                Currency = income.Currency,
+                Comments = income.Comments,
+                User = (income.User is not null ? income.User.AsDto() : null)
+            };  
+        }
+
         public static ExpenseTotalDto AsTotalDto(this Expense expense)
         {
             return new ExpenseTotalDto 
@@ -117,6 +143,20 @@ namespace moneyManager
                 Name = user.Name,
                 TotalSpent = (user.Expenses is not null ? user.Expenses.Sum(e => e.Amount) : 0)
             };
+        }
+
+        public static IncomeTotalDto AsTotalDto(this Income income) 
+        {
+            return new IncomeTotalDto
+            {
+                Id = income.Id,
+                Name = income.Name,
+                Amount = income.Amount,
+                Currency = income.Currency,
+                Comments = income.Comments,
+                UserId = income.UserId,
+                TotalExpenses = (income.User is not null ? (income.User.Expenses is not null ? income.User.Expenses.Count() : 0) : 0)
+            };  
         }
     }
 }
