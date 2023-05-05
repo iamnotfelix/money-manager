@@ -104,7 +104,7 @@ export const ExpenseAdd = () => {
         var valid = true;
 
         var errorsCopy = errors;
-        if (values.amount < 0) {
+        if (values.amount == "" || values.amount < 0) {
             errorsCopy = {
                 ...errorsCopy,
                 amountError: true,
