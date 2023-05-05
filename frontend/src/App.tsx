@@ -19,6 +19,11 @@ import { UserAdd } from './Pages/Users/UserAdd'
 import { UserUpdate } from './Pages/Users/UserUpdate'
 import { UserDelete } from './Pages/Users/UserDelete'
 import { StatisticalReport } from './Pages/StatisticalReport'
+import { Incomes } from './Pages/Incomes/Incomes'
+import { IncomeAdd } from './Pages/Incomes/IncomeAdd'
+import { IncomeDetailed } from './Pages/Incomes/IncomeDetailed'
+import { IncomeUpdate } from './Pages/Incomes/IncomeUpdate'
+import { IncomeDelete } from './Pages/Incomes/IncomeDelete'
 
 function App() {
   return (
@@ -36,17 +41,24 @@ function App() {
 			<Route path='/expenses/:id/delete' element={<ExpenseDelete/>}></Route>
 			<Route path='/expenses/filter' element={<ExpenseFilter/>}></Route>
 
+			<Route path='/categories' element={<Categories/>}></Route>
+			<Route path='/categories/:id' element={<CategoryDetailed/>}></Route>
+			<Route path='/categories/add' element={<CategoryAdd/>}></Route>
+			<Route path='/categories/:id/update' element={<CategoryUpdate/>}></Route>
+			<Route path='/categories/:id/delete' element={<CategoryDelete/>}></Route>
+
 			<Route path='/users' element={<Users/>}></Route>
 			<Route path='/users/:id' element={<UserDetailed/>}></Route>
 			<Route path='/users/add' element={<UserAdd/>}></Route>
 			<Route path='/users/:id/update' element={<UserUpdate/>}></Route>
 			<Route path='/users/:id/delete' element={<UserDelete/>}></Route>
 			
-			<Route path='/categories' element={<Categories/>}></Route>
-			<Route path='/categories/:id' element={<CategoryDetailed/>}></Route>
-			<Route path='/categories/add' element={<CategoryAdd/>}></Route>
-			<Route path='/categories/:id/update' element={<CategoryUpdate/>}></Route>
-			<Route path='/categories/:id/delete' element={<CategoryDelete/>}></Route>
+			<Route path='/incomes' element={<Incomes/>}></Route>
+			<Route path='/incomes/:id' element={<IncomeDetailed/>}></Route>
+			<Route path='/incomes/add' element={<IncomeAdd/>}></Route>
+			<Route path='/incomes/:id/update' element={<IncomeUpdate/>}></Route>
+			<Route path='/incomes/:id/delete' element={<IncomeDelete/>}></Route>
+			
       	</Routes>
     </Box>
   )
