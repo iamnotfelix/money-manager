@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using moneyManager.Repositories;
 
@@ -10,9 +11,11 @@ using moneyManager.Repositories;
 namespace moneyManager.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    partial class DatabaseContextModelSnapshot : ModelSnapshot
+    [Migration("20230505081413_AddedIncome")]
+    partial class AddedIncome
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -109,9 +112,6 @@ namespace moneyManager.Migrations
                         .HasColumnType("double");
 
                     b.Property<string>("Comments")
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("Currency")
                         .HasColumnType("longtext");
 
                     b.Property<DateTime>("DateCreated")
