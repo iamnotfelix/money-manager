@@ -1,5 +1,8 @@
+using System.ComponentModel.DataAnnotations.Schema;
+
 namespace moneyManager.Models
 {
+    [Table("categories")]
     public record Category
     {
         public Guid Id { get; init; }

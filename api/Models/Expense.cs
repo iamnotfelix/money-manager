@@ -1,14 +1,17 @@
 
+using System.ComponentModel.DataAnnotations.Schema;
+
 namespace moneyManager.Models
 {
+    [Table("expenses")]
     public record Expense 
     {
         public Guid Id { get; init; }
-        public int Amount { get; set; }
+        public double Amount { get; set; }
         public string? PaymentType { get; set; }
         public string? Description { get; set; }
         public string? Currency { get; set; }
-        public DateTime Date { get; set; }
+        public DateOnly Date { get; set; }
         public DateTime DateCreated { get; set; }
         
         // Navigation propreties
