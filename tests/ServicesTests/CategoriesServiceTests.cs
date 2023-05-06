@@ -19,7 +19,7 @@ namespace tests.ServicesTests
         public CategoriesServiceTests()
         {
             this.context = new Mock<DatabaseContext>();
-            this.uriBuilder = new moneyManager.Pagination.UriBuilder("http://localhost:5000");
+            this.uriBuilder = new moneyManager.Services.UriBuilder("http://localhost:5000");
             this.service = new CategoriesService(this.context.Object, this.uriBuilder);
         }
 

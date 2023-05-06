@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.WebUtilities;
 using moneyManager.Filters;
 
-namespace moneyManager.Pagination
+namespace moneyManager.Services
 {
     public class UriBuilder : IUriBuilder
     {

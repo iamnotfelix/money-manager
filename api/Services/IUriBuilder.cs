@@ -1,6 +1,6 @@
 using moneyManager.Filters;
 
-namespace moneyManager.Pagination
+namespace moneyManager.Services
 {
     public interface IUriBuilder
     {

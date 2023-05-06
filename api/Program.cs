@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
 using moneyManager.Dtos;
-using moneyManager.Pagination;
 using moneyManager.Repositories;
 using moneyManager.Services;
 
@@ -23,12 +22,13 @@ builder.Services.AddCors(options => {
     });
 });
 
-builder.Services.AddSingleton<IUriBuilder>(o => new moneyManager.Pagination.UriBuilder(Environment.GetEnvironmentVariable("BASE_URI")!));
+builder.Services.AddSingleton<IUriBuilder>(o => new moneyManager.Services.UriBuilder(Environment.GetEnvironmentVariable("BASE_URI")!));
 
 builder.Services.AddScoped<IService<IExpenseDto>, ExpensesService>();
 builder.Services.AddScoped<IService<ICategoryDto>, CategoriesService>();
 builder.Services.AddScoped<IService<IUserDto>, UsersService>();
 builder.Services.AddScoped<IService<IIncomeDto>, IncomesService>();
+builder.Services.AddScoped<IAuthService, AuthService>();
 
 builder.Services.AddControllers(options => options.SuppressAsyncSuffixInActionNames = false);
 // builder.Services.AddDbContext<DatabaseContext>(options => options.UseMySQL(builder.Configuration.GetConnectionString("Default")!));
