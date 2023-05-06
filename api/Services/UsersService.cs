@@ -2,7 +2,6 @@ using moneyManager.Repositories;
 using moneyManager.Models;
 using moneyManager.Dtos;
 using moneyManager.Exceptions;
-using Microsoft.AspNetCore.Mvc;
 using moneyManager.Pagination;
 using Microsoft.EntityFrameworkCore;
 using moneyManager.Filters;
@@ -20,6 +19,7 @@ namespace moneyManager.Services
             this.uriBuilder = uriBuilder;
         }
 
+        // Roles?
         public async Task<PagedResponse<IEnumerable<IUserDto>>> GetAllAsync(PaginationFilter filter, string route)
         {
             var users = await this.context.Users
@@ -32,12 +32,13 @@ namespace moneyManager.Services
                 throw new NotFoundException("Users not found.");
             }
 
-            var totalRecords = await this.context.Categories.CountAsync();
-            var usersDtos = users.Select(category => category.AsDto());
+            var totalRecords = await this.context.Users.CountAsync();
+            var usersDtos = users.Select(user => user.AsDto());
             
             return PagedResponse<IUserDto>.CreatePagedReponse(usersDtos, filter, totalRecords, uriBuilder, route);
         }
 
+        // Roles?
         public async Task<IUserDto> GetByIdAsync(Guid id)
         {
             var user = await context.Users.FindAsync(id);
@@ -45,6 +46,10 @@ namespace moneyManager.Services
             {
                 throw new NotFoundException("User not found.");
             }
+
+            await this.context.Entry(user)
+                .Reference(u => u.UserProfile)
+                .LoadAsync();
             
             await this.context.Users.Entry(user)
                 .Collection(u => u.Expenses)
@@ -57,6 +62,7 @@ namespace moneyManager.Services
             return user.AsGetByIdDto();
         }
 
+        // Admin?
         public async Task<IEnumerable<UserDto>> SearchUserAsync(SearchFilter filter)
         {
             var users = await this.context.Users
@@ -72,6 +78,7 @@ namespace moneyManager.Services
             return users.Select(user => user.AsDto());
         }
 
+        // Admin?
         public async Task<PagedResponse<IEnumerable<IUserDto>>> GetUsersTotalAsync(PaginationFilter filter, string route)
         {
             var users = await this.context.Users
@@ -85,25 +92,28 @@ namespace moneyManager.Services
                 throw new NotFoundException("Users not found.");
             }
 
-            var totalRecords = await this.context.Categories.CountAsync();
-            var usersDtos = users.Select(category => category.AsTotalDto());
+            var totalRecords = await this.context.Users.CountAsync();
+            var usersDtos = users.Select(user => user.AsTotalDto());
             
             return PagedResponse<IUserDto>.CreatePagedReponse(usersDtos, filter, totalRecords, uriBuilder, route);
         }
 
+        // Admin
         public async Task<IUserDto> AddAsync(IUserDto entity)
         {
             var user = (CreateUserDto) entity;
             var actualUser = new User() {
                 Id = Guid.NewGuid(),
                 Username = user.Username,
-                Name = user.Name,
                 Email = user.Email,
                 Password = user.Password,
                 DateCreated = DateTime.Now
             };
 
             actualUser.Validate();
+
+            string passwordHash = BCrypt.Net.BCrypt.HashPassword(user.Password);
+            actualUser.Password = passwordHash;
 
             foreach (var expenseId in user.ExpenseIds)
             {
@@ -122,6 +132,7 @@ namespace moneyManager.Services
             return actualUser.AsGetByIdDto();
         }
 
+        // Admin
         public async Task UpdateAsync(Guid id, IUserDto entity)
         {
             var user = (UpdateUserDto) entity;
@@ -132,21 +143,27 @@ namespace moneyManager.Services
             }
 
             var validationUser = new User {
-                Name = user.Name,
+                Username = user.Username,
+                Email = user.Email,
                 Password = user.Password
             };
 
             validationUser.Validate();
 
-            existingUser.Name = user.Name is null ?
-                existingUser.Name : user.Name;
+            string passwordHash = BCrypt.Net.BCrypt.HashPassword(user.Password);
+            
+            existingUser.Username = user.Username is null ?
+                existingUser.Username : user.Username;
+            existingUser.Email = user.Email is null ?
+                existingUser.Email : user.Email;
             existingUser.Password = user.Password is null ?
-                existingUser.Password : user.Password;
+                existingUser.Password : passwordHash;
 
             await this.context.SaveChangesAsync();
             // NOTE:  might have concurency problems
         }
 
+        // Admin
         public async Task DeleteAsync(Guid id)
         {
             var exisitingUser = await this.context.Users.FindAsync(id);

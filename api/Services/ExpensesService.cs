@@ -177,7 +177,7 @@ namespace moneyManager.Services
                 existingExpense.Description : expense.Description;
             existingExpense.Currency = expense.Currency is null ?
                 existingExpense.Currency : expense.Currency;
-            existingExpense.Date = expense.Date == DateTime.MinValue ?
+            existingExpense.Date = expense.Date == DateOnly.MinValue ?
                 existingExpense.Date : expense.Date;
 
             await this.context.SaveChangesAsync();

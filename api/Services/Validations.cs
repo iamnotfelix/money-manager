@@ -12,8 +12,8 @@ namespace moneyManager.Services
                 { "bt", "cash", "revolut", "revo", "alpha", ""};
             List<String> currencies = new List<string>()
                 { "lei", "ron", "euro", ""};
-            DateTime startDate = new DateTime(2000, 1, 1);
-            DateTime endDate = new DateTime(2100, 1, 1);
+            DateOnly startDate = new DateOnly(2000, 1, 1);
+            DateOnly endDate = new DateOnly(2100, 1, 1);
 
             if (expense is null)
             {
@@ -35,7 +35,7 @@ namespace moneyManager.Services
             {
                 throw new ValidationException("Currency does not exist.");
             }
-            if (expense.Date != DateTime.MinValue && expense.Date < startDate || expense.Date > endDate) 
+            if (expense.Date != DateOnly.MinValue && expense.Date < startDate || expense.Date > endDate) 
             {
                 throw new ValidationException("Date not in range.");
             }
@@ -75,10 +75,10 @@ namespace moneyManager.Services
             {
                 throw new ValidationException("Username is not valid.");
             } 
-            if (user.Name is not null && (!nameRegex.IsMatch(user.Name) || user.Name.Count() == 0))
-            {
-                throw new ValidationException("Name is not valid.");
-            } 
+            // if (user.Name is not null && (!nameRegex.IsMatch(user.Name) || user.Name.Count() == 0))
+            // {
+            //     throw new ValidationException("Name is not valid.");
+            // } 
             if (user.Email is not null && (!emailRegex.IsMatch(user.Email) || user.Email.Count() == 0))
             {
                 throw new ValidationException("Email is not valid.");

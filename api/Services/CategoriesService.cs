@@ -133,10 +133,10 @@ namespace moneyManager.Services
             }
 
             CategoryTotalDto? minimumCategory = null;
-            long minimumTotal = Int64.MaxValue;
+            double minimumTotal = Double.MaxValue;
             foreach (var category in categories)
             {
-                long total = category.ExpenseCategories.Sum(ec => ec.Expense!.Amount);
+                double total = category.ExpenseCategories.Sum(ec => ec.Expense!.Amount);
                 if (minimumTotal > total && total > 0)
                 {
                     minimumTotal = total;
@@ -172,10 +172,10 @@ namespace moneyManager.Services
             }
 
             CategoryTotalDto? maximumCategory = null;
-            long maximumTotal = Int64.MinValue;
+            double maximumTotal = Double.MinValue;
             foreach (var category in categories)
             {
-                long total = category.ExpenseCategories.Sum(ec => ec.Expense!.Amount);
+                double total = category.ExpenseCategories.Sum(ec => ec.Expense!.Amount);
                 if (maximumTotal < total && total > 0)
                 {
                     maximumTotal = total;

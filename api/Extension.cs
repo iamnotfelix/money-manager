@@ -37,7 +37,20 @@ namespace moneyManager
             {
                 Id = user.Id,
                 Username = user.Username,
-                Name = user.Name
+                Email = user.Email
+            };
+        }
+
+        public static UserProfileDto AsDto(this UserProfile userProfile)
+        {
+            return new UserProfileDto
+            {
+                Id = userProfile.Id,
+                Name = userProfile.Name,
+                Status = userProfile.Status,
+                Bio = userProfile.Bio,
+                Gender = userProfile.Gender,
+                Birthday = userProfile.Birthday
             };
         }
 
@@ -87,10 +100,10 @@ namespace moneyManager
             {
                 Id = user.Id,
                 Username = user.Username,
-                Name = user.Name,
                 Email = user.Email,
-                Expenses = user.Expenses.Select(e => e.AsDto()).ToList(),
-                Categories = user.Categories.Select(e => e.AsDto()).ToList()
+                UserProfile = (user.UserProfile is not null ? user.UserProfile.AsDto() : null),
+                Expenses = (user.Expenses is not null ? user.Expenses.Select(e => e.AsDto()).ToList() : new List<ExpenseDto>()),
+                Categories = (user.Categories is not null ? user.Categories.Select(e => e.AsDto()).ToList() : new List<CategoryDto>())
             };
         }
 
@@ -140,7 +153,7 @@ namespace moneyManager
             {
                 Id = user.Id,
                 Username = user.Username,
-                Name = user.Name,
+                Email = user.Email,
                 TotalSpent = (user.Expenses is not null ? user.Expenses.Sum(e => e.Amount) : 0)
             };
         }
