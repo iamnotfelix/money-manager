@@ -1,5 +1,5 @@
 
-namespace moneyManager.Pagination
+namespace moneyManager.Responses
 {
     public class Response<T>
     {

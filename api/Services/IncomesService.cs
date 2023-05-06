@@ -2,7 +2,7 @@ using moneyManager.Repositories;
 using moneyManager.Models;
 using moneyManager.Dtos;
 using moneyManager.Exceptions;
-using moneyManager.Pagination;
+using moneyManager.Responses;
 using Microsoft.EntityFrameworkCore;
 using moneyManager.Filters;
 

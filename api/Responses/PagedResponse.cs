@@ -2,7 +2,7 @@ using moneyManager.Dtos;
 using moneyManager.Filters;
 using moneyManager.Services;
 
-namespace moneyManager.Pagination
+namespace moneyManager.Responses
 {
     public class PagedResponse<T> : Response<T>
     {

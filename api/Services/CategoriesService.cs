@@ -3,7 +3,7 @@ using moneyManager.Models;
 using moneyManager.Dtos;
 using moneyManager.Exceptions;
 using Microsoft.EntityFrameworkCore;
-using moneyManager.Pagination;
+using moneyManager.Responses;
 using moneyManager.Filters;
 
 namespace moneyManager.Services

@@ -6,7 +6,7 @@ using System.Security.Claims;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using System.IdentityModel.Tokens.Jwt;
-using moneyManager.Pagination;
+using moneyManager.Responses;
 using System.Security.Cryptography;
 
 namespace moneyManager.Services

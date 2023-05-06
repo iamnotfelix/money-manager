@@ -1,4 +1,4 @@
-using moneyManager.Pagination;
+using moneyManager.Responses;
 using moneyManager.Filters;
 
 namespace moneyManager.Services

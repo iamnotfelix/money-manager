@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using moneyManager.Dtos;
 using moneyManager.Services;
 using moneyManager.Exceptions;
-using moneyManager.Pagination;
+using moneyManager.Responses;
 using moneyManager.Filters;
 
 namespace moneyManager.Controllers

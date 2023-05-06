@@ -1,7 +1,7 @@
 using moneyManager.Dtos;
 using moneyManager.Filters;
 using moneyManager.Models;
-using moneyManager.Pagination;
+using moneyManager.Responses;
 using moneyManager.Repositories;
 using moneyManager.Services;
 using Moq;

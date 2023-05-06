@@ -1,4 +1,4 @@
-namespace moneyManager.Pagination
+namespace moneyManager.Responses
 {
     public class LoginResponse<T> : Response<T>
     {
