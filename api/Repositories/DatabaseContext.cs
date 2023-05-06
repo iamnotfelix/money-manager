@@ -1,6 +1,5 @@
 using Microsoft.EntityFrameworkCore;
 using moneyManager.Models;
-using MySql.EntityFrameworkCore.Extensions;
 
 namespace moneyManager.Repositories
 {
@@ -11,6 +10,7 @@ namespace moneyManager.Repositories
 
         public virtual DbSet<Expense> Expenses { get; set; } = null!;
         public virtual DbSet<User> Users { get; set; } = null!;
+        public virtual DbSet<User> UserProfiles { get; set; } = null!;
         public virtual DbSet<Category> Categories { get; set; } = null!;
         public virtual DbSet<Income> Incomes { get; set; } = null!; 
         public virtual DbSet<ExpenseCategory> ExpenseCategories { get; set; } = null!;
@@ -28,6 +28,11 @@ namespace moneyManager.Repositories
                 .HasOne(ec => ec.Category)
                 .WithMany(c => c.ExpenseCategories)
                 .HasForeignKey(ec => ec.CategoryId);
+
+            // Set username to be unique
+            modelBuilder.Entity<User>()
+                .HasIndex(u => u.Username)
+                .IsUnique();
         }
     }
 }
