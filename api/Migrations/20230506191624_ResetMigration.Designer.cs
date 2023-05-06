@@ -11,8 +11,8 @@ using moneyManager.Repositories;
 namespace moneyManager.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    [Migration("20230319084113_Migration1")]
-    partial class Migration1
+    [Migration("20230506191624_ResetMigration")]
+    partial class ResetMigration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -44,7 +44,7 @@ namespace moneyManager.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Categories");
+                    b.ToTable("categories");
                 });
 
             modelBuilder.Entity("moneyManager.Models.Expense", b =>
@@ -53,14 +53,14 @@ namespace moneyManager.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("char(36)");
 
-                    b.Property<int>("Amount")
-                        .HasColumnType("int");
+                    b.Property<double>("Amount")
+                        .HasColumnType("double");
 
                     b.Property<string>("Currency")
                         .HasColumnType("longtext");
 
-                    b.Property<DateTime>("Date")
-                        .HasColumnType("datetime(6)");
+                    b.Property<DateOnly>("Date")
+                        .HasColumnType("date");
 
                     b.Property<DateTime>("DateCreated")
                         .HasColumnType("datetime(6)");
@@ -78,7 +78,7 @@ namespace moneyManager.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Expenses");
+                    b.ToTable("expenses");
                 });
 
             modelBuilder.Entity("moneyManager.Models.ExpenseCategory", b =>
@@ -89,7 +89,7 @@ namespace moneyManager.Migrations
                     b.Property<Guid>("CategoryId")
                         .HasColumnType("char(36)");
 
-                    b.Property<DateTime?>("DateCreated")
+                    b.Property<DateTime>("DateCreated")
                         .HasColumnType("datetime(6)");
 
                     b.Property<string>("Notes")
@@ -99,7 +99,38 @@ namespace moneyManager.Migrations
 
                     b.HasIndex("CategoryId");
 
-                    b.ToTable("ExpenseCategories");
+                    b.ToTable("expensecategories");
+                });
+
+            modelBuilder.Entity("moneyManager.Models.Income", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("char(36)");
+
+                    b.Property<double>("Amount")
+                        .HasColumnType("double");
+
+                    b.Property<string>("Comments")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Currency")
+                        .HasColumnType("longtext");
+
+                    b.Property<DateTime>("DateCreated")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("longtext");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("char(36)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("incomes");
                 });
 
             modelBuilder.Entity("moneyManager.Models.User", b =>
@@ -108,24 +139,68 @@ namespace moneyManager.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("char(36)");
 
+                    b.Property<string>("ActivationToken")
+                        .HasColumnType("longtext");
+
+                    b.Property<bool>("Active")
+                        .HasColumnType("tinyint(1)");
+
                     b.Property<DateTime>("DateCreated")
                         .HasColumnType("datetime(6)");
 
                     b.Property<string>("Email")
                         .HasColumnType("longtext");
 
-                    b.Property<string>("Name")
-                        .HasColumnType("longtext");
+                    b.Property<DateTime>("Expires")
+                        .HasColumnType("datetime(6)");
 
                     b.Property<string>("Password")
                         .HasColumnType("longtext");
 
                     b.Property<string>("Username")
-                        .HasColumnType("longtext");
+                        .HasColumnType("varchar(255)");
 
                     b.HasKey("Id");
 
-                    b.ToTable("Users");
+                    b.HasIndex("Username")
+                        .IsUnique();
+
+                    b.ToTable("users");
+                });
+
+            modelBuilder.Entity("moneyManager.Models.UserProfile", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("char(36)");
+
+                    b.Property<string>("Bio")
+                        .HasColumnType("longtext");
+
+                    b.Property<DateOnly>("Birthday")
+                        .HasColumnType("date");
+
+                    b.Property<DateTime>("DateCreated")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("Gender")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Status")
+                        .HasColumnType("longtext");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("char(36)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId")
+                        .IsUnique();
+
+                    b.ToTable("userprofiles");
                 });
 
             modelBuilder.Entity("moneyManager.Models.Category", b =>
@@ -169,6 +244,28 @@ namespace moneyManager.Migrations
                     b.Navigation("Expense");
                 });
 
+            modelBuilder.Entity("moneyManager.Models.Income", b =>
+                {
+                    b.HasOne("moneyManager.Models.User", "User")
+                        .WithMany("Incomes")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("moneyManager.Models.UserProfile", b =>
+                {
+                    b.HasOne("moneyManager.Models.User", "User")
+                        .WithOne("UserProfile")
+                        .HasForeignKey("moneyManager.Models.UserProfile", "UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("moneyManager.Models.Category", b =>
                 {
                     b.Navigation("ExpenseCategories");
@@ -184,6 +281,10 @@ namespace moneyManager.Migrations
                     b.Navigation("Categories");
 
                     b.Navigation("Expenses");
+
+                    b.Navigation("Incomes");
+
+                    b.Navigation("UserProfile");
                 });
 #pragma warning restore 612, 618
         }
