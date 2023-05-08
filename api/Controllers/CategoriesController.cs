@@ -5,10 +5,12 @@ using moneyManager.Services;
 using moneyManager.Exceptions;
 using moneyManager.Responses;
 using moneyManager.Filters;
+using Microsoft.AspNetCore.Authorization;
 
 namespace moneyManager.Controllers
 {
     [ApiController]
+    [Authorize]
     [Route("api/[controller]")]
     public class CategoriesController : ControllerBase
     {
@@ -21,6 +23,7 @@ namespace moneyManager.Controllers
 
         // GET /categories?pageNumber=:pageNumber&pageSize=:pageSize
         [HttpGet]
+        [AllowAnonymous]
         public async Task<ActionResult<PagedResponse<IEnumerable<CategoryDto>>>> GetCategoriesAsync([FromQuery] PaginationFilter filter) 
         {
             try
@@ -38,6 +41,7 @@ namespace moneyManager.Controllers
 
         // GET /categories/{id}
         [HttpGet("{id}")]
+        [AllowAnonymous]
         public async Task<ActionResult<GetByIdCategoryDto>> GetCategoryAsync(Guid id)
         {
             try
@@ -53,6 +57,7 @@ namespace moneyManager.Controllers
 
         // GET /categories/search?text=:text&number=:number
         [HttpGet("search")]
+        [AllowAnonymous]
         public async Task<ActionResult<IEnumerable<CategoryDto>>> SearchUserAsync([FromQuery] SearchFilter filter)
         {
             try
@@ -68,6 +73,7 @@ namespace moneyManager.Controllers
 
         // GET /categories/total?pageNumber=:pageNumber&pageSize=:pageSize
         [HttpGet("total")]
+        [AllowAnonymous]
         public async Task<ActionResult<PagedResponse<IEnumerable<CategoryTotalDto>>>> GetCategoriesTotalAsync([FromQuery] PaginationFilter filter) 
         {
             try
@@ -85,6 +91,7 @@ namespace moneyManager.Controllers
 
         // GET /categories/ordered
         [HttpGet("ordered")]
+        [AllowAnonymous]
         public async Task<ActionResult<PagedResponse<IEnumerable<CategoryTotalDto>>>> GetCategoriesOrderedByTotalExpenseAmountAsync([FromQuery] PaginationFilter filter) 
         { 
             try
@@ -101,6 +108,7 @@ namespace moneyManager.Controllers
 
         // GET /categories/minimum
         [HttpGet("minimum")]
+        [AllowAnonymous]
         public async Task<ActionResult<Category>> GetCategoryWithMinTotalExpenseAmountAsync() 
         { 
             try
@@ -116,6 +124,7 @@ namespace moneyManager.Controllers
 
         // GET /categories/maximum
         [HttpGet("maximum")]
+        [AllowAnonymous]
         public async Task<ActionResult<Category>> GetCategoryWithMaxTotalExpenseAmountAsync() 
         { 
             try
@@ -131,6 +140,7 @@ namespace moneyManager.Controllers
 
         // POST /categories
         [HttpPost]
+        [Authorize(Roles = "Admin,Moderator,Regular")]
         public async Task<ActionResult<CategoryDto>> CreateCategoryAsync(CreateCategoryDto category) 
         {
             try
@@ -146,10 +156,15 @@ namespace moneyManager.Controllers
             {
                 return ValidationProblem(e.Message);
             }
+            catch (ForbiddenException e)
+            {
+                return Forbid(e.Message);
+            }
         }
 
         // PUT /categories/{id}
         [HttpPut("{id}")]
+        [Authorize(Roles = "Admin,Moderator,Regular")]
         public async Task<ActionResult> UpdateCategoryAsync(Guid id, UpdateCategoryDto category) 
         {
             try
@@ -165,11 +180,15 @@ namespace moneyManager.Controllers
             {
                 return ValidationProblem(e.Message);
             }
-
+            catch (ForbiddenException e)
+            {
+                return Forbid(e.Message);
+            }
         }
 
         // DELETE /categories/{id}
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin,Moderator,Regular")]
         public async Task<ActionResult> DeleteCategoryAsync(Guid id)
         {
             try
@@ -180,6 +199,10 @@ namespace moneyManager.Controllers
             catch (NotFoundException e)
             {
                 return NotFound(e.Message);
+            }
+            catch (ForbiddenException e)
+            {
+                return Forbid(e.Message);
             }
         }
     }

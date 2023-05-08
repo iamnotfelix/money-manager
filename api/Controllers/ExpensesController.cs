@@ -4,10 +4,12 @@ using moneyManager.Services;
 using moneyManager.Exceptions;
 using moneyManager.Responses;
 using moneyManager.Filters;
+using Microsoft.AspNetCore.Authorization;
 
 namespace moneyManager.Controllers
 {
     [ApiController]
+    [Authorize]
     [Route("api/[controller]")]
     public class ExpensesController : ControllerBase
     {
@@ -21,6 +23,7 @@ namespace moneyManager.Controllers
 
         // GET /expenses?pageNumber=:pageNumber&pageSize=:pageSize
         [HttpGet]
+        [AllowAnonymous]
         public async Task<ActionResult<PagedResponse<IEnumerable<ExpenseDto>>>> GetExpensesAsync([FromQuery] PaginationFilter filter) 
         {
             try
@@ -37,6 +40,7 @@ namespace moneyManager.Controllers
 
         // GET /expenses/{id}
         [HttpGet("{id}")]
+        [AllowAnonymous]
         public async Task<ActionResult<GetByIdExpenseDto>> GetExpenseAsync(Guid id)
         {
             try
@@ -52,6 +56,7 @@ namespace moneyManager.Controllers
 
         // GET /expenses/filter/{nr}
         [HttpGet("filter/{nr}")]
+        [AllowAnonymous]
         public async Task<ActionResult<PagedResponse<IEnumerable<ExpenseDto>>>> GetExpensesHigherThanAsync(int nr, [FromQuery] PaginationFilter filter)
         {
             try
@@ -68,6 +73,7 @@ namespace moneyManager.Controllers
         
         // GET /expenses/total?pageNumber=:pageNumber&pageSize=:pageSize
         [HttpGet("total")]
+        [AllowAnonymous]
         public async Task<ActionResult<PagedResponse<IEnumerable<ExpenseDto>>>> GetExpensesTotalAsync([FromQuery] PaginationFilter filter)
         {
             try
@@ -84,6 +90,7 @@ namespace moneyManager.Controllers
 
         // POST /expenses
         [HttpPost]
+        [Authorize(Roles = "Admin,Moderator,Regular")]
         public async Task<ActionResult<ExpenseDto>> CreateExpenseAsync(CreateExpenseDto expense) 
         {
             try
@@ -99,10 +106,15 @@ namespace moneyManager.Controllers
             {
                 return ValidationProblem(e.Message);
             }
+            catch (ForbiddenException e)
+            {
+                return Forbid(e.Message);
+            }
         }
         
         // POST /expenses/bulk
         [HttpPost("bulk")]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult> CreateBulkExpensesAsync(ICollection<CreateExpenseDto> expenses) 
         {
             try
@@ -121,10 +133,15 @@ namespace moneyManager.Controllers
             {
                 return ValidationProblem(e.Message);
             }
+            catch (ForbiddenException e)
+            {
+                return Forbid(e.Message);
+            }
         }
 
         // PUT /expenses/{id}
         [HttpPut("{id}")]
+        [Authorize(Roles = "Admin,Moderator,Regular")]
         public async Task<ActionResult> UpdateExpenseAsync(Guid id, UpdateExpenseDto expense) 
         {
             try
@@ -140,10 +157,15 @@ namespace moneyManager.Controllers
             {
                 return ValidationProblem(e.Message);
             }
+            catch (ForbiddenException e)
+            {
+                return Forbid(e.Message);
+            }
         }
 
         // DELETE /expenses/{id}
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin,Moderator,Regular")]
         public async Task<ActionResult> DeleteExpenseAsync(Guid id)
         {
             try
@@ -154,6 +176,10 @@ namespace moneyManager.Controllers
             catch (NotFoundException e)
             {
                 return NotFound(e.Message);
+            }
+            catch (ForbiddenException e)
+            {
+                return Forbid(e.Message);
             }
         }
     }

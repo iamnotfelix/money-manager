@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using moneyManager.Dtos;
 using moneyManager.Exceptions;
@@ -8,6 +9,7 @@ using moneyManager.Services;
 namespace moneyManager.Controllers
 {
     [ApiController]
+    [Authorize]
     [Route("api/[controller]")]
     public class UsersController : ControllerBase
     {
@@ -21,6 +23,7 @@ namespace moneyManager.Controllers
 
         // GET /users?pageNumber=:pageNumber&pageSize=:pageSize
         [HttpGet]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<PagedResponse<IEnumerable<UserDto>>>> GetUsersAsync([FromQuery] PaginationFilter filter) 
         { 
             try
@@ -38,6 +41,8 @@ namespace moneyManager.Controllers
 
         // GET /users/{id}
         [HttpGet("{id}")]
+        // [Authorize(Roles = "Admin")]
+        [AllowAnonymous]
         public async Task<ActionResult<GetByIdUserDto>> GetUserAsync(Guid id)
         {
             try
@@ -53,6 +58,7 @@ namespace moneyManager.Controllers
 
         // GET /users/search?text=:text&number=:number
         [HttpGet("search")]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<IEnumerable<UserDto>>> SearchUserAsync([FromQuery] SearchFilter filter)
         {
             try
@@ -68,6 +74,7 @@ namespace moneyManager.Controllers
         
         // GET /users/total?pageNumber=:pageNumber&pageSize=:pageSize
         [HttpGet("total")]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<PagedResponse<IEnumerable<UserTotalDto>>>> GetUsersTotalAsync([FromQuery] PaginationFilter filter)
         {
             try
@@ -84,6 +91,7 @@ namespace moneyManager.Controllers
 
         // POST /users
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<UserDto>> CreateUserAsync(CreateUserDto user) 
         {
             try
@@ -103,6 +111,7 @@ namespace moneyManager.Controllers
 
         // PUT /users/{id}
         [HttpPut("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult> UpdateUserAsync(Guid id, UpdateUserDto user) 
         {
             try
@@ -122,6 +131,7 @@ namespace moneyManager.Controllers
 
         // DELETE /users/{id}
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult> DeleteUserAsync(Guid id)
         {
             try

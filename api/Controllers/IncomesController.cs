@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using moneyManager.Dtos;
 using moneyManager.Exceptions;
@@ -8,6 +9,7 @@ using moneyManager.Services;
 namespace moneyManager.Controllers
 {
     [ApiController]
+    [Authorize]
     [Route("api/[controller]")]
     public class IncomesController : ControllerBase
     {
@@ -21,6 +23,7 @@ namespace moneyManager.Controllers
 
         // GET /incomes?pageNumber=:pageNumber&pageSize=:pageSize
         [HttpGet]
+        [AllowAnonymous]
         public async Task<ActionResult<PagedResponse<IEnumerable<IncomeDto>>>> GetIncomesAsync([FromQuery] PaginationFilter filter) 
         { 
             try
@@ -37,6 +40,7 @@ namespace moneyManager.Controllers
 
         // GET /incomes/{id}
         [HttpGet("{id}")]
+        [AllowAnonymous]
         public async Task<ActionResult<GetByIdIncomeDto>> GetIncomeAsync(Guid id)
         {
             try
@@ -52,6 +56,7 @@ namespace moneyManager.Controllers
         
         // GET /incomes/total?pageNumber=:pageNumber&pageSize=:pageSize
         [HttpGet("total")]
+        [AllowAnonymous]
         public async Task<ActionResult<PagedResponse<IEnumerable<IncomeTotalDto>>>> GetIncomesTotalAsync([FromQuery] PaginationFilter filter)
         {
             try
@@ -68,6 +73,7 @@ namespace moneyManager.Controllers
 
         // POST /incomes
         [HttpPost]
+        [Authorize(Roles = "Admin,Moderator,Regular")]
         public async Task<ActionResult<IncomeDto>> CreateIncomeAsync(CreateIncomeDto income) 
         {
             try
@@ -83,10 +89,15 @@ namespace moneyManager.Controllers
             {
                 return ValidationProblem(e.Message);
             }
+            catch (ForbiddenException e)
+            {
+                return Forbid(e.Message);
+            }
         }
 
         // PUT /incomes/{id}
         [HttpPut("{id}")]
+        [Authorize(Roles = "Admin,Moderator,Regular")]
         public async Task<ActionResult> UpdateIncomeAsync(Guid id, UpdateIncomeDto income) 
         {
             try
@@ -102,10 +113,15 @@ namespace moneyManager.Controllers
             {
                 return ValidationProblem(e.Message);
             }
+            catch (ForbiddenException e)
+            {
+                return Forbid(e.Message);
+            }
         }
 
         // DELETE /incomes/{id}
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin,Moderator,Regular")]
         public async Task<ActionResult> DeleteIncomeAsync(Guid id)
         {
             try
@@ -116,6 +132,10 @@ namespace moneyManager.Controllers
             catch (NotFoundException e)
             {
                 return NotFound(e.Message);
+            }
+            catch (ForbiddenException e)
+            {
+                return Forbid(e.Message);
             }
         }
     }
