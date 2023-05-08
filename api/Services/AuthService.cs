@@ -75,6 +75,11 @@ namespace moneyManager.Services
                 throw new NotFoundException("Username or password are incorrect.");
             }
 
+            if (!actualUser.Active) 
+            {
+                throw new ValidationException("User account not activated.");
+            }
+
             if (!BCrypt.Net.BCrypt.Verify(user.Password, actualUser.Password))
             {
                 throw new NotFoundException("Username or password are incorrect.");
