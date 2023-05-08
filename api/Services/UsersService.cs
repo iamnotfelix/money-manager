@@ -12,11 +12,14 @@ namespace moneyManager.Services
     {
         private readonly DatabaseContext context;
         private readonly IUriBuilder uriBuilder;
+        private readonly IPermission permission;
 
-        public UsersService(DatabaseContext context, IUriBuilder uriBuilder)
+
+        public UsersService(DatabaseContext context, IUriBuilder uriBuilder, IPermission permission)
         {
             this.context = context;
             this.uriBuilder = uriBuilder;
+            this.permission = permission;
         }
 
         public async Task<PagedResponse<IEnumerable<IUserDto>>> GetAllAsync(PaginationFilter filter, string route)

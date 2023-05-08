@@ -12,11 +12,14 @@ namespace moneyManager.Services
     {
         private readonly DatabaseContext context;
         private readonly IUriBuilder uriBuilder;
+        private readonly IPermission permission;
 
-        public IncomesService(DatabaseContext context, IUriBuilder uriBuilder)
+
+        public IncomesService(DatabaseContext context, IUriBuilder uriBuilder, IPermission permission)
         {
             this.context = context;
             this.uriBuilder = uriBuilder;
+            this.permission = permission;
         }
         
         public async Task<PagedResponse<IEnumerable<IIncomeDto>>> GetAllAsync(PaginationFilter filter, string route)
@@ -75,6 +78,9 @@ namespace moneyManager.Services
         public async Task<IIncomeDto> AddAsync(IIncomeDto entity)
         {
             CreateIncomeDto income = (CreateIncomeDto) entity;
+
+            this.permission.Check(income.UserId);
+
             var user = await this.context.Users.FindAsync(income.UserId);
             if (user is null)
             {
@@ -103,6 +109,9 @@ namespace moneyManager.Services
         public async Task UpdateAsync(Guid id, IIncomeDto entity)
         {
             UpdateIncomeDto income = (UpdateIncomeDto) entity;
+
+            this.permission.Check(id);
+
             var existingIncome = await this.context.Incomes.FindAsync(id);
             if (existingIncome is null)
             {
@@ -133,6 +142,8 @@ namespace moneyManager.Services
         
         public async Task DeleteAsync(Guid id)
         {
+            this.permission.Check(id);
+            
             var exisitingIncome = await this.context.Incomes.FindAsync(id);
             if (exisitingIncome is null)
             {

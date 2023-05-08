@@ -12,11 +12,13 @@ namespace moneyManager.Services
     {
         private readonly DatabaseContext context;
         private readonly IUriBuilder uriBuilder;
+        private readonly IPermission permission;
 
-        public ExpensesService(DatabaseContext context, IUriBuilder uriBuilder)
+        public ExpensesService(DatabaseContext context, IUriBuilder uriBuilder, IPermission permission)
         {
             this.context = context;
             this.uriBuilder = uriBuilder;
+            this.permission = permission;
         }
         
         public async Task<PagedResponse<IEnumerable<IExpenseDto>>> GetAllAsync(PaginationFilter filter, string route)
@@ -104,6 +106,9 @@ namespace moneyManager.Services
         public async Task<IExpenseDto> AddAsync(IExpenseDto entity)
         {
             CreateExpenseDto expense = (CreateExpenseDto) entity;
+
+            this.permission.Check(expense.UserId);
+
             var user = await this.context.Users.FindAsync(expense.UserId);
             if (user is null)
             {
@@ -130,6 +135,12 @@ namespace moneyManager.Services
             foreach (var expenseCategory in expense.ExpenseCategories)
             {
                 var category = await this.context.Categories.FindAsync(expenseCategory.CategoryId);
+
+                if (category is not null) 
+                {
+                    this.permission.Check(category.UserId);
+                }
+
                 if (category is null)
                 {
                     throw new NotFoundException("Category not found.");
@@ -153,6 +164,9 @@ namespace moneyManager.Services
         public async Task UpdateAsync(Guid id, IExpenseDto entity)
         {
             UpdateExpenseDto expense = (UpdateExpenseDto) entity;
+
+            this.permission.Check(id);
+
             var existingExpense = await this.context.Expenses.FindAsync(id);
             if (existingExpense is null)
             {
@@ -198,6 +212,12 @@ namespace moneyManager.Services
                 foreach (var expenseCategory in expense.ExpenseCategories)
                 {
                     var category = await this.context.Categories.FindAsync(expenseCategory.CategoryId);
+
+                    if (category is not null) 
+                    {
+                        this.permission.Check(category.UserId);
+                    }
+
                     if (category is null)
                     {
                         throw new NotFoundException("Category not found.");
@@ -219,6 +239,8 @@ namespace moneyManager.Services
         
         public async Task DeleteAsync(Guid id)
         {
+            this.permission.Check(id);
+
             var exisitingExpense = await this.context.Expenses.FindAsync(id);
             if (exisitingExpense is null)
             {

@@ -12,11 +12,13 @@ namespace moneyManager.Services
     {
         private readonly DatabaseContext context;
         private readonly IUriBuilder uriBuilder;
+        private readonly IPermission permission;
 
-        public CategoriesService(DatabaseContext context, IUriBuilder uriBuilder)
+        public CategoriesService(DatabaseContext context, IUriBuilder uriBuilder, IPermission permission)
         {
             this.context = context;
             this.uriBuilder = uriBuilder;
+            this.permission = permission;
         }
 
         public async Task<PagedResponse<IEnumerable<ICategoryDto>>> GetAllAsync(PaginationFilter filter, string route)
@@ -201,6 +203,9 @@ namespace moneyManager.Services
         public async Task<ICategoryDto> AddAsync(ICategoryDto entity)
         {
             var category = (CreateCategoryDto) entity;
+
+            this.permission.Check(category.UserId);
+
             var user = await this.context.Users.FindAsync(category.UserId);
             if (user is null)
             {
@@ -226,6 +231,9 @@ namespace moneyManager.Services
         public async Task UpdateAsync(Guid id, ICategoryDto entity)
         {
             var category = (UpdateCategoryDto) entity;
+
+            this.permission.Check(id);
+
             var existingCategory = await this.context.Categories.FindAsync(id);
             if (existingCategory is null)
             {
@@ -250,6 +258,8 @@ namespace moneyManager.Services
         
         public async Task DeleteAsync(Guid id)
         {
+            this.permission.Check(id);
+
             var exisitingCategory = await this.context.Categories.FindAsync(id);
             if (exisitingCategory == null)
             {
