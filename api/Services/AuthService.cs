@@ -31,6 +31,7 @@ namespace moneyManager.Services
                 Username = user.Username,
                 Email = user.Email,
                 Password = user.Password,
+                Roles = "Regular",
                 DateCreated = DateTime.Now,
                 ActivationToken = CreateActivationToken(),
                 Expires = DateTime.Now.AddMinutes(10),
@@ -91,11 +92,11 @@ namespace moneyManager.Services
             DotNetEnv.Env.Load();
             
             List<Claim> claims = new List<Claim> {
-                new Claim(ClaimTypes.Name, user.Username!),
+                new Claim(ClaimTypes.Name, user.Username!)
             };
 
             List<string> roles = user.Roles!.Split(',').ToList();
-            roles.ForEach(role => claims.Append(new Claim(ClaimTypes.Role, role)));
+            roles.ForEach(role => claims.Add(new Claim(ClaimTypes.Role, role)));
 
             var key = new SymmetricSecurityKey(
                 Encoding.UTF8.GetBytes(Environment.GetEnvironmentVariable("KEY")!

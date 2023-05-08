@@ -103,7 +103,8 @@ namespace moneyManager.Services
                 Email = user.Email,
                 Password = user.Password,
                 Roles = user.Roles,
-                DateCreated = DateTime.Now
+                DateCreated = DateTime.Now,
+                Active = true
             };
 
             actualUser.Validate();
