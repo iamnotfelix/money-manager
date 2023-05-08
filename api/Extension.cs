@@ -101,6 +101,7 @@ namespace moneyManager
                 Id = user.Id,
                 Username = user.Username,
                 Email = user.Email,
+                Roles = user.Roles,
                 UserProfile = (user.UserProfile is not null ? user.UserProfile.AsDto() : null),
                 Expenses = (user.Expenses is not null ? user.Expenses.Select(e => e.AsDto()).ToList() : new List<ExpenseDto>()),
                 Categories = (user.Categories is not null ? user.Categories.Select(e => e.AsDto()).ToList() : new List<CategoryDto>())

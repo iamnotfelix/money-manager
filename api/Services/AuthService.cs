@@ -94,6 +94,9 @@ namespace moneyManager.Services
                 new Claim(ClaimTypes.Name, user.Username!),
             };
 
+            List<string> roles = user.Roles!.Split(',').ToList();
+            roles.ForEach(role => claims.Append(new Claim(ClaimTypes.Role, role)));
+
             var key = new SymmetricSecurityKey(
                 Encoding.UTF8.GetBytes(Environment.GetEnvironmentVariable("KEY")!
             ));

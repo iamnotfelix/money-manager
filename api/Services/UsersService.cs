@@ -19,7 +19,6 @@ namespace moneyManager.Services
             this.uriBuilder = uriBuilder;
         }
 
-        // Roles?
         public async Task<PagedResponse<IEnumerable<IUserDto>>> GetAllAsync(PaginationFilter filter, string route)
         {
             var users = await this.context.Users
@@ -38,7 +37,6 @@ namespace moneyManager.Services
             return PagedResponse<IUserDto>.CreatePagedReponse(usersDtos, filter, totalRecords, uriBuilder, route);
         }
 
-        // Roles?
         public async Task<IUserDto> GetByIdAsync(Guid id)
         {
             var user = await context.Users.FindAsync(id);
@@ -62,7 +60,6 @@ namespace moneyManager.Services
             return user.AsGetByIdDto();
         }
 
-        // Admin?
         public async Task<IEnumerable<UserDto>> SearchUserAsync(SearchFilter filter)
         {
             var users = await this.context.Users
@@ -78,7 +75,6 @@ namespace moneyManager.Services
             return users.Select(user => user.AsDto());
         }
 
-        // Admin?
         public async Task<PagedResponse<IEnumerable<IUserDto>>> GetUsersTotalAsync(PaginationFilter filter, string route)
         {
             var users = await this.context.Users
@@ -98,7 +94,6 @@ namespace moneyManager.Services
             return PagedResponse<IUserDto>.CreatePagedReponse(usersDtos, filter, totalRecords, uriBuilder, route);
         }
 
-        // Admin
         public async Task<IUserDto> AddAsync(IUserDto entity)
         {
             var user = (CreateUserDto) entity;
@@ -107,6 +102,7 @@ namespace moneyManager.Services
                 Username = user.Username,
                 Email = user.Email,
                 Password = user.Password,
+                Roles = user.Roles,
                 DateCreated = DateTime.Now
             };
 
@@ -132,7 +128,6 @@ namespace moneyManager.Services
             return actualUser.AsGetByIdDto();
         }
 
-        // Admin
         public async Task UpdateAsync(Guid id, IUserDto entity)
         {
             var user = (UpdateUserDto) entity;
@@ -145,7 +140,8 @@ namespace moneyManager.Services
             var validationUser = new User {
                 Username = user.Username,
                 Email = user.Email,
-                Password = user.Password
+                Password = user.Password,
+                Roles = user.Roles
             };
 
             validationUser.Validate();
@@ -158,12 +154,13 @@ namespace moneyManager.Services
                 existingUser.Email : user.Email;
             existingUser.Password = user.Password is null ?
                 existingUser.Password : passwordHash;
+            existingUser.Roles = user.Roles is null ?
+                existingUser.Roles : user.Roles;
 
             await this.context.SaveChangesAsync();
             // NOTE:  might have concurency problems
         }
 
-        // Admin
         public async Task DeleteAsync(Guid id)
         {
             var exisitingUser = await this.context.Users.FindAsync(id);
