@@ -24,6 +24,8 @@ import { IncomeAdd } from './Pages/Incomes/IncomeAdd'
 import { IncomeDetailed } from './Pages/Incomes/IncomeDetailed'
 import { IncomeUpdate } from './Pages/Incomes/IncomeUpdate'
 import { IncomeDelete } from './Pages/Incomes/IncomeDelete'
+import { Register } from './Pages/Authentication/Register'
+import { Login } from './Pages/Authentication/Login'
 
 function App() {
   return (
@@ -31,6 +33,9 @@ function App() {
         <Navbar/>
       	<Routes>
 			<Route path='/' element={<Home/>}></Route>
+
+			<Route path='/register' element={<Register/>}></Route>
+			<Route path='/login' element={<Login/>}></Route>
 
 			<Route path='/report' element={<StatisticalReport/>}></Route>
 
