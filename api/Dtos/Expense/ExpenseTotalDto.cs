@@ -8,7 +8,7 @@ namespace moneyManager.Dtos
         public string? Description { get; set; }
         public string? Currency { get; set; }
         public Guid UserId { get; set; }
-        public DateOnly Date { get; set; }
+        public DateTime Date { get; set; }
         public long TotalCategories {get; set; }
     }
 }

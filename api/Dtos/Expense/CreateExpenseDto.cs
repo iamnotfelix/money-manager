@@ -15,7 +15,7 @@ namespace moneyManager.Dtos
         [Required]
         public Guid UserId { get; set; }
         [Required]
-        public DateOnly Date { get; set; }
+        public DateTime Date { get; set; }
         [Required]
         public ICollection<ExpenseCategoryDto> ExpenseCategories { get; set; } 
             = new List<ExpenseCategoryDto>();

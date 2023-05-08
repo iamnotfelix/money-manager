@@ -11,7 +11,7 @@ namespace moneyManager.Models
         public string? PaymentType { get; set; }
         public string? Description { get; set; }
         public string? Currency { get; set; }
-        public DateOnly Date { get; set; }
+        public DateTime Date { get; set; }
         public DateTime DateCreated { get; set; }
         
         // Navigation propreties

@@ -10,7 +10,7 @@ namespace moneyManager.Models
         public string? Status { get; set; }
         public string? Bio { get; set; }
         public string? Gender { get; set; }
-        public DateOnly Birthday { get; set; }
+        public DateTime Birthday { get; set; }
         public DateTime DateCreated { get; set; }
 
         // Navigation properties
