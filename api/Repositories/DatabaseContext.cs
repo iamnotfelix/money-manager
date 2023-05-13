@@ -10,7 +10,7 @@ namespace moneyManager.Repositories
 
         public virtual DbSet<Expense> Expenses { get; set; } = null!;
         public virtual DbSet<User> Users { get; set; } = null!;
-        public virtual DbSet<User> UserProfiles { get; set; } = null!;
+        public virtual DbSet<UserProfile> UserProfiles { get; set; } = null!;
         public virtual DbSet<Category> Categories { get; set; } = null!;
         public virtual DbSet<Income> Incomes { get; set; } = null!; 
         public virtual DbSet<ExpenseCategory> ExpenseCategories { get; set; } = null!;
