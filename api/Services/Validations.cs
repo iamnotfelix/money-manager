@@ -43,7 +43,8 @@ namespace moneyManager.Services
 
         public static void Validate(this Category category) 
         {
-            var nameRegex = new Regex("^[a-zA-Z ]+$");
+            // var nameRegex = new Regex("^[a-zA-Z ]+$");
+            var nameRegex = new Regex("^[a-zA-Z0-9,-. ]+$");
 
             if (category is null)
             {
@@ -61,11 +62,12 @@ namespace moneyManager.Services
 
         public static void Validate(this User user) 
         {
-            var nameRegex = new Regex("^[a-zA-Z ]+$");
             // var emailRegex = new Regex(@"^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Za-z]{2,}$");
             // var emailRegex = new Regex(@"^.{1,50}@.{2,30}\\.{2,}$");
             var emailRegex = new Regex(@"^.*@.*$");
             var passwordRegex = new Regex(@"^(?=.*[A-Za-z])(?=.*\\d)(?=.*[@$!%*#?&])[A-Za-z\\d@$!%*#?&]{8,}$");
+            List<String> roles = new List<string>() 
+                { "admin", "moderator", "regular", ""};
 
             if (user is null)
             {
@@ -75,10 +77,6 @@ namespace moneyManager.Services
             {
                 throw new ValidationException("Username is not valid.");
             } 
-            // if (user.Name is not null && (!nameRegex.IsMatch(user.Name) || user.Name.Count() == 0))
-            // {
-            //     throw new ValidationException("Name is not valid.");
-            // } 
             if (user.Email is not null && (!emailRegex.IsMatch(user.Email) || user.Email.Count() == 0))
             {
                 throw new ValidationException("Email is not valid.");
@@ -86,13 +84,46 @@ namespace moneyManager.Services
             if (user.Password is not null && user.Password!.Count() < 8)
             {
                 throw new ValidationException("Password is not valid.");
-            } 
-            
+            }
+            if (user.Roles is not null) 
+            {
+                user.Roles.Split(',').ToList().ForEach(role => 
+                {
+                    if (!roles.Contains(role.ToLower()))
+                    {
+                        throw new ValidationException("Role is not valid.");
+                    }
+                });
+            }
         }
 
         public static void Validate(this UserProfile userProfile)
         {
-            
+            var nameRegex = new Regex("^[a-zA-Z ]+$");
+            var genders = new List<string> () { "male", "female", "" };
+            DateTime startDate = new DateTime(2000, 1, 1);
+            DateTime endDate = new DateTime(2100, 1, 1);
+
+            if (userProfile.Name is not null && (!nameRegex.IsMatch(userProfile.Name) || userProfile.Name.Count() == 0))
+            {
+                throw new ValidationException("Name is not valid.");
+            }
+            if (userProfile.Status is not null && userProfile.Status.Count() > 250) 
+            {
+                throw new ValidationException("Status is too long.");
+            }
+            if (userProfile.Bio is not null && userProfile.Bio.Count() > 250) 
+            {
+                throw new ValidationException("Bio is too long.");
+            }
+            if (userProfile.Gender is not null && !genders.Contains(userProfile.Gender.ToLower()))
+            {
+                throw new ValidationException("Gender is not valid.");
+            }
+            if (userProfile.Birthday != DateTime.MinValue && userProfile.Birthday < startDate || userProfile.Birthday > endDate) 
+            {
+                throw new ValidationException("Date not in range.");
+            }
         }
 
         public static void Validate(this Income income) 
