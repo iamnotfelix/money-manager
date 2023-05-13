@@ -108,7 +108,7 @@ namespace moneyManager.Controllers
             }
             catch (ForbiddenException e)
             {
-                return Forbid(e.Message);
+                return BadRequest(e.Message);
             }
         }
         
@@ -135,7 +135,7 @@ namespace moneyManager.Controllers
             }
             catch (ForbiddenException e)
             {
-                return Forbid(e.Message);
+                return BadRequest(e.Message);
             }
         }
 
@@ -159,7 +159,7 @@ namespace moneyManager.Controllers
             }
             catch (ForbiddenException e)
             {
-                return Forbid(e.Message);
+                return BadRequest(e.Message);
             }
         }
 
@@ -179,7 +179,7 @@ namespace moneyManager.Controllers
             }
             catch (ForbiddenException e)
             {
-                return Forbid(e.Message);
+                return BadRequest(e.Message);
             }
         }
     }

@@ -58,7 +58,7 @@ namespace moneyManager.Controllers
 
         // GET /users/search?text=:text&number=:number
         [HttpGet("search")]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,Moderator")]
         public async Task<ActionResult<IEnumerable<UserDto>>> SearchUserAsync([FromQuery] SearchFilter filter)
         {
             try
