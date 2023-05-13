@@ -1,10 +1,12 @@
 import { FormGroup, Grid, Paper } from "@mui/material"
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useForm } from "../../Components/Forms/useForm";
 import { FormComponent } from "../../Components/Forms/FormComponent";
 import { FormHeader } from "../../Components/Forms/FormHeader";
 import { InputComponent } from "../../Components/Forms/InputComponent";
 import { FormButton } from "../../Components/Forms/FormButton";
+import axios from "../../Components/Auth/axios";
+import { useAuth } from "../../Components/Hooks/useAuth";
 
 const initialValues = {
     username: "",
@@ -20,9 +22,14 @@ const initialErrorValues = {
 
 export const Login = () => {
     const navigate = useNavigate();
+    
+    const location = useLocation();
+    const from = location.state?.from?.pathname || '/';
+    const { setAuth } = useAuth();
 
     const {
         values,
+        setValues,
         errors,
         setErrors,
         handleChange,
@@ -63,18 +70,28 @@ export const Login = () => {
             password: values.password
         }
 
-        // const response = await window.fetch(import.meta.env.VITE_REACT_API_BACKEND + `/auth/login`, {
-        //     method: 'POST',
-        //     mode: 'cors',
-        //     headers: {
-        //         'content-type': 'application/json',  
-        //     },
-        //     body: JSON.stringify(body)
-        // });
-        
-        // navigate("/");
+        try {
+            const response = await axios.post(
+                `/auth/login`, 
+                JSON.stringify(body), 
+                {
+                    headers: {
+                        'content-type': 'application/json',
+                        'Access-Control-Allow-Origin': '*'
+                    }
+                });
+            setValues(initialValues);
+            setAuth({
+                token: response.data.token,
+                userId: response.data.data.id,
+                roles: response.data.data.roles.split(",")
+            })
 
-        console.log(body);
+            navigate(from, { replace: true });
+        } catch (e: any) {
+            // TODO: show server error message somewhere on the form
+            console.log(e);
+        }
     }
 
     return (

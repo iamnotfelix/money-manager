@@ -7,6 +7,8 @@ import { TableComponenet } from './TableComponent';
 import { TableContent } from './TableContent';
 import { TableHeader } from './TableHeader';
 import { TableNavigator } from './TableNavigator';
+import axios from '../Auth/axios';
+import { useAuth } from '../Hooks/useAuth';
 
 const header = ["Index", "Name", "Username", "Total spent", ""];
 const contentKeys = ["name", "username", "totalSpent"];
@@ -21,6 +23,8 @@ const initialNavigatorValues = {
 }
 
 export const UsersTable = () => {
+    const { auth } = useAuth();
+
     const [users, setUsers] = useState<User []>([]);
 
     const [loading, setLoading] = useState(false);
@@ -35,10 +39,22 @@ export const UsersTable = () => {
     useEffect(() => {
         setLoading(true);
         const fetchData = async () => {
-            const data = await fetch(navigatorValues.current);
-            const res = await data.json();
-            setUsers(res.data);
-            handlePageChange(res);
+            try {
+                const response = await axios.get(
+                    navigatorValues.current,  
+                    {
+                        headers: {
+                            'content-type': 'application/json',
+                            'Access-Control-Allow-Origin': '*',
+                            'Authorization': `Bearer ${auth.token}`
+                        }
+                });
+                setUsers(response.data.data);
+                handlePageChange(response.data);
+            } catch (e: any) {
+                // TODO: show server error message somewhere
+                console.log(e);
+            }
         }
         fetchData();
         setLoading(false);

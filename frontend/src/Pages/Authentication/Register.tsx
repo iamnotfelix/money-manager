@@ -1,10 +1,13 @@
-import { FormGroup, Grid, Paper } from "@mui/material"
+import { Alert, AlertTitle, FormGroup, Grid, Paper } from "@mui/material"
 import { useNavigate } from "react-router-dom";
 import { useForm } from "../../Components/Forms/useForm";
 import { FormComponent } from "../../Components/Forms/FormComponent";
 import { FormHeader } from "../../Components/Forms/FormHeader";
 import { InputComponent } from "../../Components/Forms/InputComponent";
 import { FormButton } from "../../Components/Forms/FormButton";
+import { useAuth } from "../../Components/Hooks/useAuth";
+import { useState } from "react";
+import axios from "../../Components/Auth/axios";
 
 const initialValues = {
     username: "",
@@ -24,13 +27,20 @@ const initialErrorValues = {
 export const Register = () => {
     const navigate = useNavigate();
 
+    // const location = useLocation();
+    // const from = location.state?.from?.pathname || '/';
+    const { setAuth } = useAuth();
+
     const {
         values,
+        setValues,
         errors,
         setErrors,
         handleChange,
         handleInputChange
     } = useForm(initialValues, initialErrorValues);
+
+    const [activationToken, setActivationToken] = useState<string | null>(null);
 
     const validate = () => {
         let valid = true;
@@ -75,6 +85,25 @@ export const Register = () => {
             password: values.password
         }
 
+        try {
+            const response = await axios.post(
+                `/auth/register`, 
+                JSON.stringify(body), 
+                {
+                    headers: {
+                        'content-type': 'application/json',
+                        'Access-Control-Allow-Origin': '*'
+                    }
+                });
+            setValues(initialValues);
+            setActivationToken(response.data);
+
+            // navigate(from, { replace: true });
+        } catch (e: any) {
+            // TODO: show server error message somewhere on the form
+            console.log(e);
+        }
+
         // const response = await window.fetch(import.meta.env.VITE_REACT_API_BACKEND + `/auth/register`, {
         //     method: 'POST',
         //     mode: 'cors',
@@ -85,8 +114,6 @@ export const Register = () => {
         // });
         
         // navigate("/");
-
-        console.log(body);
     }
 
     return (
@@ -132,6 +159,15 @@ export const Register = () => {
                     <Grid item xs={12}>
                         <FormButton onClick={handleSubmit} text="Register"/>
                     </Grid>
+                    {activationToken 
+                        ? <Grid item xs={12}>
+                            <Alert severity="info">
+                                <AlertTitle>Activation Token</AlertTitle>
+                                {activationToken}
+                            </Alert>
+                        </Grid>
+                        : <div></div>
+                    }
                 </Grid>
             </FormGroup>
         </FormComponent>

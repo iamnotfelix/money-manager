@@ -2,6 +2,7 @@ import MonetizationOnIcon from '@mui/icons-material/MonetizationOn';
 import { AppBar, Button, Stack, Toolbar, Typography, styled } from '@mui/material'
 import { Container } from '@mui/system';
 import { Link } from 'react-router-dom'
+import { useAuth } from './Hooks/useAuth';
 
 const StyledToolbar = styled(Toolbar) ({
     display:"flex",
@@ -20,6 +21,8 @@ const SimpleLink = styled(Link) ({
 })
 
 export const Navbar = () => {
+    const { auth } = useAuth();
+
     return (
         <AppBar position="sticky">
             <StyledToolbar>
@@ -36,7 +39,7 @@ export const Navbar = () => {
                 <Container 
                     sx={{ flexGrow: 7}}
                 >
-                    <Stack direction="row" spacing={12}>
+                    <Stack direction="row" spacing={4}>
                         <SimpleLink to="/expenses">
                             <NavbarButton variant='text'>Expenses</NavbarButton>
                         </SimpleLink>
@@ -55,6 +58,22 @@ export const Navbar = () => {
                         <SimpleLink to={"/report"}>
                             <NavbarButton variant='text'>Statistical report</NavbarButton>
                         </SimpleLink>
+                        {!auth &&
+                        <SimpleLink to={"/register"}>
+                            <NavbarButton variant='text'>Register</NavbarButton>
+                        </SimpleLink>}
+                        {!auth && 
+                        <SimpleLink to={"/login"}>
+                            <NavbarButton variant='text'>Login</NavbarButton>
+                        </SimpleLink>}
+                        {auth &&
+                        <SimpleLink to={"/profile"}>
+                            <NavbarButton variant='text'>Profile</NavbarButton>
+                        </SimpleLink>}
+                        {auth && 
+                        <SimpleLink to={"/logout"}>
+                            <NavbarButton variant='text'>Logout</NavbarButton>
+                        </SimpleLink>}
                     </Stack>
                 </Container>
             </StyledToolbar>

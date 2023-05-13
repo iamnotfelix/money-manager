@@ -11,6 +11,8 @@ import { InputComponent } from "../../Components/Forms/InputComponent";
 import { SelectComponent } from "../../Components/Forms/SelectComponent";
 import { FormButton } from "../../Components/Forms/FormButton";
 import { FormHeader } from "../../Components/Forms/FormHeader";
+import axios from "../../Components/Auth/axios";
+import { useAuth } from "../../Components/Hooks/useAuth";
 
 const initialValues = {
     amount: 0,
@@ -43,6 +45,8 @@ const paymentTypes = [ { value:"Cash", label:"Cash" }, { value:"BT", label:"BT" 
 export const ExpenseAdd = () => {
     const navigate = useNavigate();
 
+    const { auth } = useAuth();
+
     const {
         values,
         errors,
@@ -55,9 +59,23 @@ export const ExpenseAdd = () => {
     const [allCategories, setAllCategories] = useState<Category []>([]);
 
     const fetchCategories = async (text: string, number: number) => {
-        const data = await fetch(import.meta.env.VITE_REACT_API_BACKEND + `/categories/search?text=${text}&number=${number}`);
-        const res = await data.json();
-        setAllCategories(res);
+        try {
+            const response = await axios.get(
+                import.meta.env.VITE_REACT_API_BACKEND + `/categories/search?text=${text}&number=${number}`,  
+                {
+                    headers: {
+                        'content-type': 'application/json',
+                        'Access-Control-Allow-Origin': '*',
+                        'Authorization': `Bearer ${auth.token}`
+                    }
+            });
+            const ownedCategories = response.data.filter((c: Category) => c.userId = auth.userId);
+            console.log(ownedCategories);
+            setAllCategories(ownedCategories);
+        } catch (e: any) {
+            // TODO: show server error message somewhere
+            console.log(e);
+        }
     }
 
     const fetchUsers = async (text: string, number: number) => {

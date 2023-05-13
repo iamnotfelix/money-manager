@@ -26,6 +26,10 @@ import { IncomeUpdate } from './Pages/Incomes/IncomeUpdate'
 import { IncomeDelete } from './Pages/Incomes/IncomeDelete'
 import { Register } from './Pages/Authentication/Register'
 import { Login } from './Pages/Authentication/Login'
+import { RequireAuth } from './Components/Auth/RequireAuth'
+import { Unauthorized } from './Pages/Authentication/Unauthorized'
+import { Profile } from './Pages/Authentication/Profile'
+import { Logout } from './Pages/Authentication/Logout'
 
 function App() {
   return (
@@ -36,34 +40,49 @@ function App() {
 
 			<Route path='/register' element={<Register/>}></Route>
 			<Route path='/login' element={<Login/>}></Route>
+			<Route path='/unauthorized' element={<Unauthorized/>}></Route>
 
 			<Route path='/report' element={<StatisticalReport/>}></Route>
 
 			<Route path='/expenses' element={<Expenses/>}></Route>
-			<Route path='/expenses/:id' element={<ExpenseDetailed/>}></Route>
-			<Route path='/expenses/add' element={<ExpenseAdd/>}></Route>
-			<Route path='/expenses/:id/update' element={<ExpenseUpdate/>}></Route>
-			<Route path='/expenses/:id/delete' element={<ExpenseDelete/>}></Route>
 			<Route path='/expenses/filter' element={<ExpenseFilter/>}></Route>
+			<Route path='/expenses/:id' element={<ExpenseDetailed/>}></Route>
+			<Route element={<RequireAuth allowedRoles={["Admin", "Moderator", "Regular"]}/>}>
+				<Route path='/expenses/add' element={<ExpenseAdd/>}></Route>
+				<Route path='/expenses/:id/update' element={<ExpenseUpdate/>}></Route>
+				<Route path='/expenses/:id/delete' element={<ExpenseDelete/>}></Route>
+			</Route>
 
 			<Route path='/categories' element={<Categories/>}></Route>
 			<Route path='/categories/:id' element={<CategoryDetailed/>}></Route>
-			<Route path='/categories/add' element={<CategoryAdd/>}></Route>
-			<Route path='/categories/:id/update' element={<CategoryUpdate/>}></Route>
-			<Route path='/categories/:id/delete' element={<CategoryDelete/>}></Route>
+			<Route element={<RequireAuth allowedRoles={["Admin", "Moderator", "Regular"]}/>}>
+				<Route path='/categories/add' element={<CategoryAdd/>}></Route>
+				<Route path='/categories/:id/update' element={<CategoryUpdate/>}></Route>
+				<Route path='/categories/:id/delete' element={<CategoryDelete/>}></Route>
+			</Route>
 
-			<Route path='/users' element={<Users/>}></Route>
 			<Route path='/users/:id' element={<UserDetailed/>}></Route>
-			<Route path='/users/add' element={<UserAdd/>}></Route>
-			<Route path='/users/:id/update' element={<UserUpdate/>}></Route>
-			<Route path='/users/:id/delete' element={<UserDelete/>}></Route>
+			<Route element={<RequireAuth allowedRoles={["Admin"]}/>}>
+				<Route path='/users/:id/update' element={<UserUpdate/>}></Route>
+			</Route>
+			<Route element={<RequireAuth allowedRoles={["Admin"]}/>}>
+				<Route path='/users' element={<Users/>}></Route>
+				<Route path='/users/add' element={<UserAdd/>}></Route>
+				<Route path='/users/:id/delete' element={<UserDelete/>}></Route>
+			</Route>
 			
 			<Route path='/incomes' element={<Incomes/>}></Route>
 			<Route path='/incomes/:id' element={<IncomeDetailed/>}></Route>
-			<Route path='/incomes/add' element={<IncomeAdd/>}></Route>
-			<Route path='/incomes/:id/update' element={<IncomeUpdate/>}></Route>
-			<Route path='/incomes/:id/delete' element={<IncomeDelete/>}></Route>
+			<Route element={<RequireAuth allowedRoles={["Admin", "Moderator", "Regular"]}/>}>
+				<Route path='/incomes/add' element={<IncomeAdd/>}></Route>
+				<Route path='/incomes/:id/update' element={<IncomeUpdate/>}></Route>
+				<Route path='/incomes/:id/delete' element={<IncomeDelete/>}></Route>
+			</Route>
 			
+			<Route element={<RequireAuth allowedRoles={["Admin", "Moderator", "Regular"]}/>}>
+				<Route path='/profile' element={<Profile/>}></Route>
+				<Route path='/logout' element={<Logout/>}></Route>
+			</Route>
       	</Routes>
     </Box>
   )
