@@ -27,6 +27,22 @@ builder.Services.AddCors(options => {
     });
 });
 
+builder.Services.AddAuthentication(options => 
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+}).AddJwtBearer(options => 
+{
+    options.TokenValidationParameters = new TokenValidationParameters 
+    {
+        ValidateIssuerSigningKey = true,
+        ValidateAudience = false,
+        ValidateIssuer = false,
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Environment.GetEnvironmentVariable("KEY")!))
+    };
+});
+
 builder.Services.AddSingleton<IUriBuilder>(o => new moneyManager.Services.UriBuilder(Environment.GetEnvironmentVariable("BASE_URI")!));
 builder.Services.AddHttpContextAccessor();
 
@@ -34,6 +50,7 @@ builder.Services.AddScoped<IService<IExpenseDto>, ExpensesService>();
 builder.Services.AddScoped<IService<ICategoryDto>, CategoriesService>();
 builder.Services.AddScoped<IService<IUserDto>, UsersService>();
 builder.Services.AddScoped<IService<IIncomeDto>, IncomesService>();
+builder.Services.AddScoped<IUserProfilesService, UserProfilesService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IPermission, Permission>();
 
@@ -53,17 +70,6 @@ builder.Services.AddSwaggerGen( options => {
     });
 
     options.OperationFilter<SecurityRequirementsOperationFilter>();
-});
-
-builder.Services.AddAuthentication().AddJwtBearer(options => 
-{
-    options.TokenValidationParameters = new TokenValidationParameters 
-    {
-        ValidateIssuerSigningKey = true,
-        ValidateAudience = false,
-        ValidateIssuer = false,
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Environment.GetEnvironmentVariable("KEY")!))
-    };
 });
 
 var app = builder.Build();
