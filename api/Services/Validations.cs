@@ -90,6 +90,11 @@ namespace moneyManager.Services
             
         }
 
+        public static void Validate(this UserProfile userProfile)
+        {
+            
+        }
+
         public static void Validate(this Income income) 
         {
             List<String> currencies = new List<string>()

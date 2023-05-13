@@ -165,13 +165,13 @@ namespace moneyManager.Services
         {
             UpdateExpenseDto expense = (UpdateExpenseDto) entity;
 
-            this.permission.Check(id);
-
             var existingExpense = await this.context.Expenses.FindAsync(id);
             if (existingExpense is null)
             {
                 throw new NotFoundException("Expense not found.");
             }
+
+            this.permission.Check(existingExpense.UserId);
 
             var validationExpense = new Expense {
                 Amount = expense.Amount,
@@ -239,14 +239,14 @@ namespace moneyManager.Services
         
         public async Task DeleteAsync(Guid id)
         {
-            this.permission.Check(id);
-
             var exisitingExpense = await this.context.Expenses.FindAsync(id);
             if (exisitingExpense is null)
             {
                 throw new NotFoundException("Expense not found.");
             }
             
+            this.permission.Check(exisitingExpense.UserId);
+
             this.context.Expenses.Remove(exisitingExpense);
             await this.context.SaveChangesAsync();
         }

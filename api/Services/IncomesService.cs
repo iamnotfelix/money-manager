@@ -110,13 +110,13 @@ namespace moneyManager.Services
         {
             UpdateIncomeDto income = (UpdateIncomeDto) entity;
 
-            this.permission.Check(id);
-
             var existingIncome = await this.context.Incomes.FindAsync(id);
             if (existingIncome is null)
             {
                 throw new NotFoundException("Income not found.");
             }
+
+            this.permission.Check(existingIncome.UserId);
 
             var validationIncome = new Income {
                 Name = income.Name,
@@ -142,14 +142,14 @@ namespace moneyManager.Services
         
         public async Task DeleteAsync(Guid id)
         {
-            this.permission.Check(id);
-            
             var exisitingIncome = await this.context.Incomes.FindAsync(id);
             if (exisitingIncome is null)
             {
                 throw new NotFoundException("Income not found.");
             }
             
+            this.permission.Check(exisitingIncome.UserId);
+
             this.context.Incomes.Remove(exisitingIncome);
             await this.context.SaveChangesAsync();
         }

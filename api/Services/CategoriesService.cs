@@ -232,13 +232,13 @@ namespace moneyManager.Services
         {
             var category = (UpdateCategoryDto) entity;
 
-            this.permission.Check(id);
-
             var existingCategory = await this.context.Categories.FindAsync(id);
             if (existingCategory is null)
             {
                 throw new NotFoundException("Category not found.");
             }
+
+            this.permission.Check(existingCategory.UserId);
 
             var validationCategory = new Category {
                 Name = category.Name,
@@ -258,14 +258,14 @@ namespace moneyManager.Services
         
         public async Task DeleteAsync(Guid id)
         {
-            this.permission.Check(id);
-
             var exisitingCategory = await this.context.Categories.FindAsync(id);
             if (exisitingCategory == null)
             {
                 throw new NotFoundException("Category not found.");
             }
             
+            this.permission.Check(exisitingCategory.UserId);
+
             this.context.Categories.Remove(exisitingCategory); 
             await this.context.SaveChangesAsync();
         }
